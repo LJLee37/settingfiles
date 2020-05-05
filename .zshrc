@@ -112,3 +112,4 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 #setfont /usr/share/consolefonts/Uni3-Terminus20x10.psf.gz
 
 neofetch
+alias vim='nvim'

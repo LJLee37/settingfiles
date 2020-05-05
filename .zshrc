@@ -75,7 +75,7 @@ COMPLETION_WAITING_DOTS="true"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+plugins=(git tmux)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -110,4 +110,5 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 #setfont /usr/share/consolefonts/Uni3-Terminus20x10.psf.gz
+
 neofetch

@@ -1,21 +1,24 @@
 set nocompatible
 filetype off
-set rtp+=~/.vim/bundle/Vundle.vim 
-call vundle#begin()
-Plugin 'Vundlevim/Vundle.vim'
-Plugin 'vim-airline/vim-airline'
-Plugin 'scrooloose/nerdtree'
-Plugin 'airblade/vim-gitgutter'
-Plugin 'octol/vim-cpp-enhanced-highlight'
-Plugin 'tpope/vim-fugitive'
-Plugin 'scrooloose/syntastic'
-Plugin 'nanotech/jellybeans.vim' 
-Plugin 'zxqfl/tabnine-vim' 
+call plug#begin('~/.config/nvim/plugged')
+" Use release branch
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Or latest tag
+Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
+" Or build from source code by use yarn: https://yarnpkg.com
+Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
+Plug 'scrooloose/nerdtree'
+Plug 'nanotech/jellybeans.vim'
+Plug 'vim-airline/vim-airline'
+Plug 'airblade/vim-gitgutter'
+Plug 'octol/vim-cpp-enhanced-highlight'
+Plug 'tpope/vim-fugitive'
+Plug 'scrooloose/syntastic'
 
-call vundle#end()
-filetype plugin indent on
+call plug#end()
 
 autocmd VimEnter * NERDTree
+
 autocmd VimEnter * wincmd p
 syntax on
 set autoindent
@@ -42,3 +45,5 @@ set softtabstop=4
 set tabstop=4
 set list
 set t_Co=256
+nmap <F6> :NERDTreeToggle<CR>
+

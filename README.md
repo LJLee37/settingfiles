@@ -1,6 +1,6 @@
 # settingFiles
 ## Installation
-Install zsh, tmux, neovim with your package manager.
+Install zsh, tmux, neovim, git curl with your package manager.
 
 Then,
 

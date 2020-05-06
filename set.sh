@@ -10,8 +10,10 @@ curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 curl -sL install-node.now.sh/lts | sudo bash
 curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
 mkdir .config/nvim
-ln gitRepos/settingfiles/init.vim .config/nvim/
-ln gitRepos/settingfiles/.zshrc .zshrc
+ln ~/gitRepos/settingfiles/init.vim .config/nvim/
+ln ~/gitRepos/settingfiles/.zshrc .zshrc
 nvim +PlugInstall +qall
-nvim +call coc#util#install() +checkhealth
+echo call coc#util#install() >> ~/gitRepos/settingfiles/init.vim
+nvim +qall
+sed '$d' ~/gitRepos/settingfiles/init.vim
 

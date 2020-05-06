@@ -13,7 +13,4 @@ mkdir .config/nvim
 ln ~/gitRepos/settingfiles/init.vim .config/nvim/
 ln ~/gitRepos/settingfiles/.zshrc .zshrc
 nvim +PlugInstall +qall
-echo call coc#util#install() >> ~/gitRepos/settingfiles/init.vim
-nvim +qall
-sed '$d' ~/gitRepos/settingfiles/init.vim
 

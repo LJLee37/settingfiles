@@ -46,3 +46,6 @@ set list
 set t_Co=256
 nmap <F6> :NERDTreeToggle<CR>
 set cino=:0g0
+command! MakeTags !ctags -R .
+set path+=**
+set clipboard=unnamedplus

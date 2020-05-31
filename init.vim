@@ -1,19 +1,18 @@
 set nocompatible
 filetype off
+filetype plugin on
 call plug#begin('~/.config/nvim/plugged')
-" Use release branch
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" Or latest tag
-Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
-" Or build from source code by use yarn: https://yarnpkg.com
-Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
+Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 Plug 'scrooloose/nerdtree'
 Plug 'nanotech/jellybeans.vim'
+Plug 'huawenyu/neogdb.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'tpope/vim-fugitive'
 Plug 'scrooloose/syntastic'
+Plug 'zchee/deoplete-jedi'
+Plug 'jiangmiao/auto-pairs'
 
 call plug#end()
 
@@ -44,7 +43,7 @@ set smarttab
 "set tabstop=4
 set list
 set t_Co=256
-nmap <F6> :NERDTreeToggle<CR>
+nmap <F11> :NERDTreeToggle<CR>
 set cino=:0g0
 command! MakeTags !ctags -R .
 set path+=**

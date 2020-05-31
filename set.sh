@@ -7,10 +7,11 @@ ln -s -f .tmux/.tmux.conf
 cp .tmux/.tmux.conf.local .
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-curl -sL install-node.now.sh/lts | sudo bash
-curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
-mkdir .config/nvim
-ln ~/gitRepos/settingfiles/init.vim .config/nvim/
-ln ~/gitRepos/settingfiles/.zshrc .zshrc
-nvim +PlugInstall +qall
+#curl -sL install-node.now.sh/lts | sudo bash
+#curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
+mkdir ~/.config/nvim
+ln -sf ~/gitRepos/settingfiles/init.vim ~/.config/nvim/
+ln -sf ~/gitRepos/settingfiles/.zshrc ~/.zshrc
+ln -s ~/.config/nvim/init.vim ~/init.vim
+#nvim +PlugInstall +qall
 

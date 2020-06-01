@@ -40,11 +40,13 @@ set smartcase " 검색시 대소문자 구별
 set smarttab
 "set smartindent
 "set softtabstop=4
-"set tabstop=4
+filetype plugin indent on
+set tabstop=4
 set list
 set t_Co=256
-nmap <F11> :NERDTreeToggle<CR>
+nmap <F12> :NERDTreeToggle<CR>
 set cino=:0g0
 command! MakeTags !ctags -R .
 set path+=**
 set clipboard=unnamedplus
+set expandtab

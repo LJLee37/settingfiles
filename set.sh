@@ -1,7 +1,7 @@
 #!/bin/zsh
-curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
-p10k configure
+# curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+#  git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
+# p10k configure
 cd
 git clone https://github.com/gpakosz/.tmux.git
 ln -s -f .tmux/.tmux.conf
@@ -12,6 +12,7 @@ curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
 #curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
 mkdir -P ~/.config/nvim
 cp ~/gitRepos/settingfiles/init.vim ~/.config/nvim/init.vim
+mv ~/.zshrc ~/.zshrc.bak
 cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc
 ln -s ~/.config/nvim/init.vim ~/init.vim
 nvim +PlugInstall +qall

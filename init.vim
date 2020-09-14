@@ -73,8 +73,9 @@ nmap <silent> ,m :bnext<CR>
 nmap ,b= :!g++ <C-r>% -o <C-r>%.out<CR>
 nmap ,r= :!./<C-r>%.out<CR>
 nmap ,rp :!python3 <C-r>%<CR>
-nmap <C-`> :terminal<CR>
+nmap ,` :terminal<CR>
 nmap ,bc :!gcc <C-r>% -o <C-r>%.out<CR>
 nmap ,d= :!g++ -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
+nmap ,t :Tagbar<CR>
 

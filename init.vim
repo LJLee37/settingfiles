@@ -67,6 +67,6 @@ let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
 let g:airline_theme='jellybeans'
 let g:diminactive_use_syntax = 1
 let g:diminactive_enable_focus = 1
-
+let g:airline_powerline_fonts = 1
 
 

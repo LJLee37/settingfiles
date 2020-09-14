@@ -50,7 +50,7 @@ set smarttab
 "set tabstop=4
 set list
 set t_Co=256
-nmap <F6> :NERDTreeToggle<CR>
+map <silent> <C-s> :NERDTreeToggle<CR>
 set cino=:0g0
 command! MakeTags !ctags -R .
 set path+=**
@@ -68,5 +68,7 @@ let g:airline_theme='jellybeans'
 let g:diminactive_use_syntax = 1
 let g:diminactive_enable_focus = 1
 let g:airline_powerline_fonts = 1
+nmap <silent> ,n :bprevious<CR>
+nmap <silent> ,m :bnext<CR>
 
 

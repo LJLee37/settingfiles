@@ -1,22 +1,27 @@
 set nocompatible
 filetype off
-filetype plugin on
 call plug#begin('~/.config/nvim/plugged')
+" Use release branch
+"Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Or latest tag
+"Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
+" Or build from source code by use yarn: https://yarnpkg.com
+"Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
 Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
 Plug 'scrooloose/nerdtree'
 Plug 'nanotech/jellybeans.vim'
-Plug 'huawenyu/neogdb.vim'
 Plug 'vim-airline/vim-airline'
 Plug 'airblade/vim-gitgutter'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'tpope/vim-fugitive'
 Plug 'scrooloose/syntastic'
-Plug 'zchee/deoplete-jedi'
-Plug 'jiangmiao/auto-pairs'
+Plug 'preservim/tagbar'
+Plug 'nathanaelkane/vim-indent-guides'
+
 
 call plug#end()
 
-autocmd VimEnter * NERDTree
+"autocmd VimEnter * NERDTree
 
 autocmd VimEnter * wincmd p
 syntax on
@@ -40,13 +45,11 @@ set smartcase " 검색시 대소문자 구별
 set smarttab
 "set smartindent
 "set softtabstop=4
-filetype plugin indent on
-set tabstop=4
+"set tabstop=4
 set list
 set t_Co=256
-nmap <F12> :NERDTreeToggle<CR>
+nmap <F6> :NERDTreeToggle<CR>
 set cino=:0g0
 command! MakeTags !ctags -R .
 set path+=**
 set clipboard=unnamedplus
-set expandtab

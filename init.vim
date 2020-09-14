@@ -17,6 +17,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'scrooloose/syntastic'
 Plug 'preservim/tagbar'
 Plug 'nathanaelkane/vim-indent-guides'
+Plug 'vim-airline/vim-airline-themes'
+Plug 'blueyed/vim-diminactive'
 
 
 call plug#end()
@@ -33,11 +35,11 @@ let g:cpp_class_decl_highlight = 1
 let g:cpp_posix_standard = 1
 let g:cpp_experimental_simple_template_highlight = 1
 let g:cpp_concepts_highlight = 1
-"set ts=4 " Tab 너비
+set ts=4 " Tab 너비
 set shiftwidth=4 " 자동 인덴트할 때 너비
 set hlsearch " 검색어 하이라이팅
 set autowrite " 다른 파일로 넘어갈 때 자동 저장
-"set sw=1 " 스크롤바 너비
+set sw=1 " 스크롤바 너비
 set sts=4 "st select
 colorscheme jellybeans
 set showmatch " 일치하는 괄호 하이라이팅
@@ -53,3 +55,18 @@ set cino=:0g0
 command! MakeTags !ctags -R .
 set path+=**
 set clipboard=unnamedplus
+let g:indent_guides_enable_on_vim_startup = 1
+"let g:indent_guides_auto_colors = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  ctermbg=darkgrey
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven ctermbg=darkgrey
+let g:indent_guides_guide_size = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline_theme='jellybeans'
+let g:diminactive_use_syntax = 1
+let g:diminactive_enable_focus = 1
+
+
+

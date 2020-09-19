@@ -19,7 +19,7 @@ Plug 'preservim/tagbar'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'blueyed/vim-diminactive'
-
+Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
 
 call plug#end()
 
@@ -73,8 +73,8 @@ let g:airline_powerline_fonts = 1
 nmap <silent> ,n :bprevious<CR>
 nmap <silent> ,m :bnext<CR>
 nmap ,b= :!g++ <C-r>% -o <C-r>%.out<CR>
-nmap ,r= :!./<C-r>%.out<CR>
-nmap ,rp :!python3 <C-r>%<CR>
+nmap ,r= :terminal ./<C-r>%.out<CR>
+nmap ,rp :terminal python3 <C-r>%<CR>
 nmap ,` :terminal<CR>
 nmap ,bc :!gcc <C-r>% -o <C-r>%.out<CR>
 nmap ,d= :!g++ -g <C-r>% -o <C-r>%.debug.out<CR>

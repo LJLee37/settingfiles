@@ -84,4 +84,4 @@ nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
 autocmd VimEnter * DiscordUpdatePresence
-
+nmap ,w :%s/\r//g

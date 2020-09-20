@@ -7,7 +7,7 @@ call plug#begin('~/.config/nvim/plugged')
 "Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
 " Or build from source code by use yarn: https://yarnpkg.com
 "Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
-Plug 'neoclide/coc.nvim', {'tag': '*', 'do': './install.sh'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
 Plug 'nanotech/jellybeans.vim'
 Plug 'vim-airline/vim-airline'
@@ -19,6 +19,8 @@ Plug 'preservim/tagbar'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'blueyed/vim-diminactive'
+"Plug 'vbe0201/vimdiscord'
+"Plug 'anned20/vimsence'
 Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
 
 call plug#end()
@@ -81,4 +83,5 @@ nmap ,d= :!g++ -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
+autocmd VimEnter * DiscordUpdatePresence
 

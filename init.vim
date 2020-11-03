@@ -7,6 +7,7 @@ call plug#begin('~/.config/nvim/plugged')
 "Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
 " Or build from source code by use yarn: https://yarnpkg.com
 "Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
+"
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
 Plug 'nanotech/jellybeans.vim'
@@ -84,4 +85,7 @@ nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
 autocmd VimEnter * DiscordUpdatePresence
-nmap ,w :%s/\r//g
+nmap ,w :%s/\r//g<CR>
+nmap ,s :%s/<C-i>/    /g<CR>
+"set spelllang=en_us,en_gb
+"set spell

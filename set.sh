@@ -11,7 +11,8 @@ curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 #curl -sL install-node.now.sh/lts | sudo bash
 #curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
-mkdir -P ~/.config/nvim
+mkdir ~/.config
+mkdir ~/.config/nvim
 cp ~/gitRepos/settingfiles/init.vim ~/.config/nvim/init.vim
 mv ~/.zshrc ~/.zshrc.bak
 cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc

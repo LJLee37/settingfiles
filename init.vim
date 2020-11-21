@@ -7,7 +7,6 @@ call plug#begin('~/.config/nvim/plugged')
 "Plug 'neoclide/coc.nvim', {'tag': '*', 'branch': 'release'}
 " Or build from source code by use yarn: https://yarnpkg.com
 "Plug 'neoclide/coc.nvim', {'do': 'yarn install --frozen-lockfile'}
-"
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'scrooloose/nerdtree'
 Plug 'nanotech/jellybeans.vim'
@@ -16,13 +15,13 @@ Plug 'airblade/vim-gitgutter'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'tpope/vim-fugitive'
 Plug 'scrooloose/syntastic'
-Plug 'preservim/tagbar'
+"Plug 'preservim/tagbar'
 Plug 'nathanaelkane/vim-indent-guides'
 Plug 'vim-airline/vim-airline-themes'
-Plug 'blueyed/vim-diminactive'
+"Plug 'blueyed/vim-diminactive'
 "Plug 'vbe0201/vimdiscord'
 "Plug 'anned20/vimsence'
-Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
+"Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
 
 call plug#end()
 
@@ -84,8 +83,5 @@ nmap ,d= :!g++ -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
-autocmd VimEnter * DiscordUpdatePresence
-nmap ,w :%s/\r//g<CR>
-nmap ,s :%s/<C-i>/    /g<CR>
-"set spelllang=en_us,en_gb
-"set spell
+"autocmd VimEnter * DiscordUpdatePresence
+nmap ,w :%s/\r//g

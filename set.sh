@@ -1,5 +1,5 @@
 #!/bin/zsh
-brew install neovim tmux git yarn minecraft
+brew install neovim tmux git yarn minecraft google-chrome discord visual-studio-code karabiner-elements
 python3 -m pip install neovim
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
@@ -18,4 +18,4 @@ mv ~/.zshrc ~/.zshrc.bak
 cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc
 ln -s ~/.config/nvim/init.vim ~/init.vim
 nvim +PlugInstall +qall
-
+cp karabiner.json ~/.config/karabiner/karabiner.json

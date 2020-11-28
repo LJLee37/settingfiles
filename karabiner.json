@@ -22,7 +22,6 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "^com\\.apple\\.finder$"
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -47,7 +46,6 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "^com\\.apple\\.finder$"
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -72,7 +70,6 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "^com\\.apple\\.finder$"
                                         ],
                                         "type": "frontmost_application_unless"
                                     }
@@ -97,7 +94,6 @@
                                 "conditions": [
                                     {
                                         "bundle_identifiers": [
-                                            "^com\\.apple\\.finder$"
                                         ],
                                         "type": "frontmost_application_unless"
                                     }

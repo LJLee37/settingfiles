@@ -10,9 +10,9 @@ curl -sL install-node.now.sh/lts | sudo bash
 curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
 mkdir ~/.config
 mkdir ~/.config/nvim
-cp ~/gitRepos/settingfiles/init.vim ~/.config/nvim/init.vim
+cp ~/gitRepos/Personal/settingfiles/init.vim ~/.config/nvim/init.vim
 mv ~/.zshrc ~/.zshrc.bak
-cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc
+cp ~/gitRepos/Personal/settingfiles/.zshrc ~/.zshrc
 ln -s ~/.config/nvim/init.vim ~/init.vim
 nvim +PlugInstall +qall
 

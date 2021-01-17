@@ -117,3 +117,5 @@ neofetch
 alias vim='nvim'
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+eval `keychain --agents ssh --eval ljlee_id`
+

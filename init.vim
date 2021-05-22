@@ -22,7 +22,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'blueyed/vim-diminactive'
 "Plug 'vbe0201/vimdiscord'
 "Plug 'anned20/vimsence'
-Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
+"Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
 "Plug 'MarcWeber/vim-addon-mw-utils'
 "Plug 'tomtom/tlib_vim'
 "Plug 'garbas/vim-snipmate'
@@ -32,7 +32,7 @@ call plug#end()
 
 "autocmd VimEnter * NERDTree
 
-autocmd VimEnter * wincmd p
+"autocmd VimEnter * wincmd p
 syntax on
 set cindent
 set number

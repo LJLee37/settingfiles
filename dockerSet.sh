@@ -2,6 +2,7 @@
 apk add wget curl git zsh neovim python3 py3-pip yarn ctags g++ clang-extra-tools python3-dev aports-build neofetch tmux
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
+python3 -m pip install wheel
 python3 -m pip install neovim
 yarn global add neovim
 # p10k configure
@@ -16,5 +17,4 @@ mv ~/.zshrc ~/.zshrc.bak
 cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc
 ln -s ~/.config/nvim/init.vim ~/init.vim
 nvim +PlugInstall +qall
-nvim +CocInstall coc-clangd coc-python +qall
 

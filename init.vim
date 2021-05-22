@@ -88,7 +88,7 @@ nmap ,d= :!g++ -std=c++17 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -std=c11 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
-autocmd VimEnter * DiscordUpdatePresence
+"autocmd VimEnter * DiscordUpdatePresence
 nmap ,w :%s/\r//g<CR>
 nmap ,s :%s/<C-i>/    /g<CR>
 "set spelllang=en_us,en_gb

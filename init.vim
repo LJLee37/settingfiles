@@ -23,6 +23,10 @@ Plug 'blueyed/vim-diminactive'
 "Plug 'vbe0201/vimdiscord'
 "Plug 'anned20/vimsence'
 Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
+"Plug 'MarcWeber/vim-addon-mw-utils'
+"Plug 'tomtom/tlib_vim'
+"Plug 'garbas/vim-snipmate'
+"Plug 'honza/vim-snippets'
 
 call plug#end()
 
@@ -75,13 +79,13 @@ let g:diminactive_enable_focus = 1
 let g:airline_powerline_fonts = 1
 nmap <silent> ,n :bprevious<CR>
 nmap <silent> ,m :bnext<CR>
-nmap ,b= :!g++ <C-r>% -o <C-r>%.out<CR>
+nmap ,b= :!g++ -std=c++17 <C-r>% -o <C-r>%.out<CR>
 nmap ,r= :terminal ./<C-r>%.out<CR>
 nmap ,rp :terminal python3 <C-r>%<CR>
 nmap ,` :terminal<CR>
-nmap ,bc :!gcc <C-r>% -o <C-r>%.out<CR>
-nmap ,d= :!g++ -g <C-r>% -o <C-r>%.debug.out<CR>
-nmap ,dc :!gcc -g <C-r>% -o <C-r>%.debug.out<CR>
+nmap ,bc :!gcc -std=c11 <C-r>% -o <C-r>%.out<CR>
+nmap ,d= :!g++ -std=c++17 -g <C-r>% -o <C-r>%.debug.out<CR>
+nmap ,dc :!gcc -std=c11 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
 autocmd VimEnter * DiscordUpdatePresence

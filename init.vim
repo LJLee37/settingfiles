@@ -22,7 +22,7 @@ Plug 'vim-airline/vim-airline-themes'
 Plug 'blueyed/vim-diminactive'
 "Plug 'vbe0201/vimdiscord'
 "Plug 'anned20/vimsence'
-Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
+"Plug 'aurieh/discord.nvim', { 'do': ':UpdateRemotePlugins'}
 "Plug 'MarcWeber/vim-addon-mw-utils'
 "Plug 'tomtom/tlib_vim'
 "Plug 'garbas/vim-snipmate'
@@ -50,7 +50,7 @@ set autowrite " 다른 파일로 넘어갈 때 자동 저장
 set sts=4 "st select
 set expandtab
 set autoindent
-colorscheme jellybeans
+"colorscheme jellybeans
 set showmatch " 일치하는 괄호 하이라이팅
 set smartcase " 검색시 대소문자 구별
 set smarttab
@@ -88,7 +88,7 @@ nmap ,d= :!g++ -std=c++17 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -std=c11 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
 let g:indent_guides_indent_size = 4
-autocmd VimEnter * DiscordUpdatePresence
+"autocmd VimEnter * DiscordUpdatePresence
 nmap ,w :%s/\r//g<CR>
 nmap ,s :%s/<C-i>/    /g<CR>
 "set spelllang=en_us,en_gb

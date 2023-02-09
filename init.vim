@@ -27,6 +27,7 @@ Plug 'blueyed/vim-diminactive'
 "Plug 'tomtom/tlib_vim'
 "Plug 'garbas/vim-snipmate'
 "Plug 'honza/vim-snippets'
+Plug 'github/copilot.vim'
 
 call plug#end()
 
@@ -50,7 +51,7 @@ set autowrite " 다른 파일로 넘어갈 때 자동 저장
 set sts=4 "st select
 set expandtab
 set autoindent
-"colorscheme jellybeans
+colorscheme jellybeans
 set showmatch " 일치하는 괄호 하이라이팅
 set smartcase " 검색시 대소문자 구별
 set smarttab

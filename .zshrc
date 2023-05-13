@@ -114,9 +114,13 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 #sudo apt update && sudo apt upgrade -y
 clear
 neofetch
-alias vim='nvim'
 
 export PATH="$HOME/.local/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 eval `keychain --agents ssh --eval ljlee_id`
-export GPG_TTY=$(tty)
-export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+export GPG_TTY=`tty`
+#export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+
+export EDITOR=nvim
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

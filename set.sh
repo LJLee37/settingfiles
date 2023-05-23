@@ -1,5 +1,9 @@
 #!/bin/zsh
-sudo pacman -Syu base-devel htop neovim nodejs yarn python-pip
+sudo pacman -Syu base-devel htop neovim nodejs yarn python-pip tmux keychain clang
+scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id ~/.ssh/ljlee_id
+scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
+cat ~/.ssh/ljlee_id.pub >> ~/.ssh/authorized_keys
+chsh
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 python3 -m pip install neovim
 yarn global add neovim

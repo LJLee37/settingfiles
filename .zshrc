@@ -9,7 +9,7 @@ fi
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/$USER/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -114,6 +114,7 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 #sudo apt update && sudo apt upgrade -y
 clear
 neofetch
+alias vim='nvim'
 
 export PATH="$HOME/.local/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 eval `keychain --agents ssh --eval ljlee_id`

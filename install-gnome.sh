@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sudo pacman -Syu --noconfirm baobab cheese eog evince gdm gnome-backgrounds gnome-calculator gnome-calendar gnome-characters gnome-clocks gnome-color-manager gnome-console gnome-control-center gnome-disk-utility gnome-font-viewer gnome-keyring gnome-logs gnome-menus gnome-music gnome-photos gnome-remote-desktop gnome-session gnome-settings-daemon gnome-shell gnome-shell-extensions gnome-system-monitor gnome-text-editor gnome-user-share gnome-user-docs gnome-weather grilo-plugins gvfs gvfs-afc gvfs-goa gvfs-google gvfs-gphoto2 gvfs-mtp gvfs-nfs gvfs-smb nautilus rygel simple-scan sushi totem tracker3-miners xdg-desktop-portal-gnome xdg-user-dirs-gtk accerciser evolution file-roller five-or-more four-in-a-row geary gedit ghex gitg gnome-2048 gnome-chess gnome-games gnome-klotski gnome-mahjongg gnome-mines gnome-multi-writer gnome-sound-recorder gnome-sudoku gnome-taquin gnome-terminal gnome-tetravex gnome-tweaks hitori iagno quadrapassel seahorse sysprof tali
+
+sudo systemctl enable gdm

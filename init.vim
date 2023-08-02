@@ -42,12 +42,12 @@ let g:cpp_class_decl_highlight = 1
 let g:cpp_posix_standard = 1
 let g:cpp_experimental_simple_template_highlight = 1
 let g:cpp_concepts_highlight = 1
-set ts=4 " Tab 너비
-set shiftwidth=4 " 자동 인덴트할 때 너비
+set ts=2 " Tab 너비
+set shiftwidth=2 " 자동 인덴트할 때 너비
 set hlsearch " 검색어 하이라이팅
 set autowrite " 다른 파일로 넘어갈 때 자동 저장
 "set sw=1 " 스크롤바 너비
-set sts=4 "st select
+set sts=2 "st select
 set expandtab
 set autoindent
 "colorscheme jellybeans
@@ -55,8 +55,8 @@ set showmatch " 일치하는 괄호 하이라이팅
 set smartcase " 검색시 대소문자 구별
 set smarttab
 "set smartindent
-"set softtabstop=4
-"set tabstop=4
+"set softtabstop=2
+"set tabstop=2
 set list
 set t_Co=256
 map <silent> <C-s> :NERDTreeToggle<CR>
@@ -87,7 +87,7 @@ nmap ,bc :!gcc -std=c11 <C-r>% -o <C-r>%.out<CR>
 nmap ,d= :!g++ -std=c++17 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,dc :!gcc -std=c11 -g <C-r>% -o <C-r>%.debug.out<CR>
 nmap ,t :Tagbar<CR>
-let g:indent_guides_indent_size = 4
+let g:indent_guides_indent_size = 2
 "autocmd VimEnter * DiscordUpdatePresence
 nmap ,w :%s/\r//g<CR>
 nmap ,s :%s/<C-i>/    /g<CR>

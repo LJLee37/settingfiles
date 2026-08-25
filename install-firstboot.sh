@@ -42,7 +42,7 @@ fi
 
 echo "==> Installing base packages"
 pacman -S --needed --noconfirm \
-  zsh tmux neovim git base-devel htop keychain gdb ctags neofetch \
+  zsh tmux neovim git base-devel htop keychain gdb ctags fastfetch \
   python-pip python-neovim \
   networkmanager iwd bluez bluez-utils \
   sudo openssh man-db man-pages

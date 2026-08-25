@@ -52,15 +52,20 @@ firmware boot instead of GRUB, no `intel-ucode`).
 1. On a **separate** Linux machine with the SD card/USB drive attached,
    clone this branch and run `install-sdcard.sh /dev/sdX` (partitions,
    formats, and extracts the ALARM rootfs onto the media). The Pi has no
-   OS yet at this point, so this step can't run on the Pi itself.
+   OS yet at this point, so this step can't run on the Pi itself. This
+   machine needs `gpg` installed and outbound access to a keyserver: the
+   script fetches ALARM's signing key by pinned fingerprint and verifies
+   the downloaded tarball's `.sig` before extracting it (the tarball
+   itself is only ever served over plain HTTP, so this is the only real
+   integrity/authenticity check in the chain).
 2. Boot the Pi from that media. SSH in as `alarm`/`alarm` (or `root`/`root`),
    copy `install-firstboot.sh` over, and run it as root — pass `5` as the
    first argument on a Raspberry Pi 5 (see the script header). This does
    `pacman-key` init, a full system update, locale/timezone/hostname,
    creates a user account, and enables NetworkManager/bluetooth/sshd.
 3. Reboot, log in as that user, then run `set.sh` to pull in dotfiles.
-4. `backup.sh` makes a full-system + boot-partition backup and copies it
-   to a LAN host — check the destination host/path before running it.
+4. `backup.sh` makes a full-system + boot-partition backup and `scp`s it
+   to `ljlee@server.ljlee37.com:/srv/netatalk/PersonalData/RpiBackups/`.
 
 Written against a Raspberry Pi 4 Model B (64-bit) using the generic
 `ArchLinuxARM-rpi-aarch64-latest.tar.gz` image (ALARM lists this as also

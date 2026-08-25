@@ -25,12 +25,18 @@ TARBALL_URL="${2:-http://os.archlinuxarm.org/os/ArchLinuxARM-rpi-aarch64-latest.
 BOOT_SIZE_MIB=256
 MOUNT_ROOT=/mnt/alarm-root
 
+# Fingerprint of "Arch Linux ARM Build System <builder@archlinuxarm.org>",
+# published at https://archlinuxarm.org/about/downloads ("All releases are
+# signed with the same key used for package signing"). Pinned here so a
+# malicious/compromised keyserver response can't substitute a different key.
+ALARM_KEY_FPR="68B3537F39A313B3E574D06777193F152BDBE6A6"
+
 if [[ ! -b "$DEVICE" ]]; then
   echo "error: $DEVICE is not a block device" >&2
   exit 1
 fi
 
-for cmd in parted mkfs.vfat mkfs.ext4 bsdtar curl; do
+for cmd in parted mkfs.vfat mkfs.ext4 bsdtar curl gpg; do
   command -v "$cmd" >/dev/null || { echo "error: $cmd is required on the host running this script" >&2; exit 1; }
 done
 
@@ -66,7 +72,35 @@ mount "$BOOT_PART" "$MOUNT_ROOT/boot"
 
 echo "==> Downloading $TARBALL_URL"
 TARBALL="/tmp/$(basename "$TARBALL_URL")"
+SIG="$TARBALL.sig"
 curl -L -o "$TARBALL" "$TARBALL_URL"
+curl -L -o "$SIG" "$TARBALL_URL.sig"
+
+# This host has no TLS available for the tarball itself (mirrors serve it
+# over plain HTTP, and os.archlinuxarm.org's cert doesn't even cover its
+# own hostname), so this GPG check is the only real integrity/authenticity
+# guarantee before the tarball becomes the Pi's root filesystem -- it must
+# pass before extraction.
+echo "==> Verifying rootfs signature"
+GNUPGHOME="$(mktemp -d)"
+export GNUPGHOME
+chmod 700 "$GNUPGHOME"
+trap 'rm -rf "$GNUPGHOME"' EXIT
+
+imported=0
+for ks in hkps://keyserver.ubuntu.com hkps://keys.openpgp.org hkps://pgp.mit.edu; do
+  if gpg --batch --keyserver "$ks" --recv-keys "$ALARM_KEY_FPR" 2>/dev/null; then
+    imported=1
+    break
+  fi
+done
+[[ "$imported" == 1 ]] || { echo "error: could not fetch ALARM signing key $ALARM_KEY_FPR from any keyserver" >&2; exit 1; }
+
+fetched_fpr="$(gpg --batch --with-colons --fingerprint "$ALARM_KEY_FPR" | awk -F: '/^fpr:/ { print $10; exit }')"
+[[ "$fetched_fpr" == "$ALARM_KEY_FPR" ]] || { echo "error: fetched key fingerprint does not match pinned fingerprint" >&2; exit 1; }
+
+gpg --batch --verify "$SIG" "$TARBALL"
+echo "==> Signature OK"
 
 # bsdtar (not GNU tar) is required: it preserves the extended
 # attributes/ACLs the rootfs relies on, which plain `tar` can silently
@@ -77,7 +111,7 @@ bsdtar -xpf "$TARBALL" -C "$MOUNT_ROOT"
 sync
 umount "$MOUNT_ROOT/boot" "$MOUNT_ROOT"
 rmdir "$MOUNT_ROOT/boot" "$MOUNT_ROOT" 2>/dev/null || true
-rm -f "$TARBALL"
+rm -f "$TARBALL" "$SIG"
 
 cat <<EOF
 

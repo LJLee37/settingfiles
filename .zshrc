@@ -113,9 +113,12 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 
 #sudo apt update && sudo apt upgrade -y
 clear
-neofetch
+fastfetch
 alias vim='nvim'
 
 export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 eval `keychain --agents ssh --eval ljlee_id`
 export GPG_TTY=$(tty)

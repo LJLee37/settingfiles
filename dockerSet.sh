@@ -1,6 +1,6 @@
 #!/bin/sh
-apk add wget curl git zsh neovim python3 py3-pip yarn ctags g++ clang-extra-tools python3-dev aports-build neofetch tmux perl
-curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+apk add wget curl git zsh neovim python3 py3-pip yarn ctags g++ clang-extra-tools python3-dev aports-build fastfetch tmux perl
+curl -L https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
 python3 -m pip install wheel
 python3 -m pip install neovim

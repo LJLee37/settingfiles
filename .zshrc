@@ -113,7 +113,7 @@ POWERLEVEL9K_RIGHT_PROMPT_ELEMENTS=(status root_indicator ram swap load ssh batt
 
 #sudo apt update && sudo apt upgrade -y
 clear
-neofetch
+fastfetch
 alias vim='nvim'
 
 export PATH="$HOME/.local/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"

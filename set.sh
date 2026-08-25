@@ -1,15 +1,16 @@
 #!/bin/zsh
-sudo pacman -Syu htop nodejs yarn keychain clang neofetch
+sudo pacman -Syu htop nodejs yarn keychain clang fastfetch
 scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id ~/.ssh/ljlee_id
 scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
 cat ~/.ssh/ljlee_id.pub >> ~/.ssh/authorized_keys
-curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+curl -L https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh
 python3 -m pip install neovim
 mv ~/.zshrc ~/.zshrc.bak
 cp ~/gitRepos/Personal/settingfiles/.zshrc ~/.zshrc
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.7/install.sh | bash
 source ~/.zshrc
-nvm install 18
+nvm install --lts
+nvm alias default 'lts/*'
 yarn global add neovim
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/themes/powerlevel10k
 git clone https://github.com/gpakosz/.tmux.git ~/.tmux

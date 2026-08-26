@@ -36,7 +36,7 @@ if [[ ! -b "$DEVICE" ]]; then
   exit 1
 fi
 
-for cmd in parted mkfs.vfat mkfs.ext4 bsdtar curl gpg; do
+for cmd in parted mkfs.vfat mkfs.ext4 bsdtar curl gpg blkid; do
   command -v "$cmd" >/dev/null || { echo "error: $cmd is required on the host running this script" >&2; exit 1; }
 done
 
@@ -107,6 +107,24 @@ echo "==> Signature OK"
 # drop or mishandle.
 echo "==> Extracting rootfs (bsdtar, preserves xattrs/ACLs)"
 bsdtar -xpf "$TARBALL" -C "$MOUNT_ROOT"
+
+# The stock rootfs's /etc/fstab hardcodes /dev/mmcblk0p1 for /boot, but the
+# Pi's mmc controller probe order isn't guaranteed -- the same card can come
+# up as /dev/mmcblk0 on one boot and /dev/mmcblk1 on the next. When that
+# happens, boot.mount waits the full device-timeout for a device that will
+# never appear, local-fs.target fails as a dependency, and systemd drops to
+# "emergency mode". PARTUUID doesn't depend on enumeration order, and
+# nofail/x-systemd.automount means even a genuinely slow/late device just
+# gets mounted lazily on first access instead of blocking boot.
+echo "==> Rewriting /boot's fstab entry to use PARTUUID (mmcblk0/mmcblk1 numbering isn't stable across boots)"
+BOOT_PARTUUID="$(blkid -s PARTUUID -o value "$BOOT_PART")"
+[[ -n "$BOOT_PARTUUID" ]] || { echo "error: could not read PARTUUID of $BOOT_PART" >&2; exit 1; }
+cat > "$MOUNT_ROOT/etc/fstab" <<EOF
+# Static information about the filesystems.
+# See fstab(5) for details.
+# <file system>              <dir>  <type>  <options>                                              <dump> <pass>
+PARTUUID=$BOOT_PARTUUID  /boot  vfat    defaults,nofail,x-systemd.automount,x-systemd.device-timeout=30  0       0
+EOF
 
 sync
 umount "$MOUNT_ROOT/boot" "$MOUNT_ROOT"

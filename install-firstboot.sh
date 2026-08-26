@@ -28,6 +28,19 @@ PI_MODEL="${1:-4}"
 USERNAME="${USERNAME:-ljlee}"
 HOSTNAME_VALUE="${HOSTNAME_VALUE:-raspi-arch}"
 
+# The kernel package's post-install hook copies the new kernel image into
+# /boot. If /boot isn't actually mounted at that point, the hook has
+# nowhere to write it: pacman's database ends up saying the new kernel is
+# installed (and its modules land under /usr/lib/modules/<new-version>/,
+# which doesn't need /boot), but the Pi keeps booting the *old* kernel
+# image that's still sitting on the boot partition -- whose now-removed
+# module directory no longer exists. The running kernel then can't find
+# any of its own modules (network drivers included). Fail fast here
+# instead of silently corrupting that install.
+echo "==> Checking /boot is mounted before touching the kernel package"
+mountpoint -q /boot || mount /boot
+mountpoint -q /boot || { echo "error: /boot is not mounted -- fix this before continuing (see install-sdcard.sh's fstab PARTUUID fix)" >&2; exit 1; }
+
 echo "==> Initializing pacman keyring for ALARM"
 pacman-key --init
 pacman-key --populate archlinuxarm
@@ -60,7 +73,15 @@ echo "LANG=en_GB.UTF-8" > /etc/locale.conf
 
 echo "==> Timezone"
 ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
-hwclock --systohc
+# The Pi has no battery-backed hardware RTC, so hwclock has nothing to
+# sync to and always fails with "Cannot access the Hardware Clock via
+# any known method." Only run it if a real RTC device shows up (e.g. an
+# add-on RTC HAT).
+if [[ -e /dev/rtc0 ]]; then
+  hwclock --systohc
+else
+  echo "no /dev/rtc0 (no hardware RTC -- normal on a stock Pi) -- skipping hwclock"
+fi
 
 echo "==> Hostname"
 echo "$HOSTNAME_VALUE" > /etc/hostname
@@ -74,6 +95,17 @@ visudo
 echo "==> Neovim symlinks"
 ln -sf /usr/bin/nvim /usr/local/bin/vim
 ln -sf /usr/bin/nvim /usr/local/bin/vi
+
+echo "==> WiFi: point NetworkManager at iwd"
+# iwd is installed above but NetworkManager defaults to its wpa_supplicant
+# backend, which isn't in the package list -- without this, nmcli has no
+# usable backend and WiFi silently doesn't work.
+mkdir -p /etc/NetworkManager/conf.d
+cat > /etc/NetworkManager/conf.d/wifi_backend.conf <<'EOF'
+[device]
+wifi.backend=iwd
+EOF
+systemctl enable iwd
 
 echo "==> Enabling services"
 # The stock image networks eth0 via systemd-networkd/dhcpcd by default;

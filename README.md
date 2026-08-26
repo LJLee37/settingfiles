@@ -74,3 +74,70 @@ this writing; `install-firstboot.sh 5` swaps in the kernel package the
 community currently recommends there instead. Re-check
 https://archlinuxarm.org for your specific model before a new install —
 ALARM's supported devices, image names, and procedure do change over time.
+
+## Troubleshooting history (raspi-arch)
+
+Real problems hit during actual installs, and why the scripts now do what
+they do. Both fixes below are already baked into `install-sdcard.sh` /
+`install-firstboot.sh` — this is here for when something still goes
+wrong, or you're wondering why a step exists.
+
+**"You are in emergency mode" on first boot, with only a `/boot` line in
+`/etc/fstab`.** Not having a `/` line in fstab is normal for ALARM (root
+is mounted by the kernel/U-Boot boot script via `root=PARTUUID=...`, not
+fstab) — that's not the bug. The actual cause: the stock rootfs's fstab
+hardcodes `/dev/mmcblk0p1` for `/boot`, but the Pi's mmc controller probe
+order isn't guaranteed — the same card can enumerate as `/dev/mmcblk0` on
+one boot and `/dev/mmcblk1` on the next (confirmed mid-incident via
+`lsblk`: the card was `mmcblk1`, so `/dev/mmcblk0p1` never existed that
+boot). `boot.mount` then waits the full device-timeout for a device that
+will never appear, `local-fs.target` fails as a dependency, and systemd
+drops to emergency mode. (`systemctl --failed` can show 0 units by the
+time you look, if the device happens to show up moments later and gets
+mounted manually — the shell still stays on `emergency.target` until a
+reboot, since nothing exits it automatically.) **Fix:** `install-sdcard.sh`
+now rewrites `/boot`'s fstab entry to `PARTUUID=...` (stable regardless of
+enumeration order) with `nofail,x-systemd.automount,x-systemd.device-timeout=30`,
+so even a genuinely slow-to-appear device just mounts lazily instead of
+blocking boot.
+
+**Kernel and `/lib/modules` version mismatch after an interrupted
+`pacman -Syu`** (missing `.ko` files for wifi/bluetooth/DRM, `eth0` not
+showing up at all). If `/boot` isn't mounted when a kernel package
+upgrade runs, pacman still updates its database and drops the new modules
+under `/usr/lib/modules/<new-version>/`, but the post-install hook that
+copies the new kernel image into `/boot` has nowhere to write it. The Pi
+keeps booting the *old* kernel image still sitting on the boot partition —
+whose module directory pacman just deleted as part of the "upgrade." The
+running kernel then can't find any of its own modules, including network
+drivers, so interfaces like `eth0` never appear. This is exactly what
+happens if you Ctrl+C an `install-firstboot.sh` run mid-`pacman -Syu`
+because you noticed `/boot` wasn't mounted (which is *why* it's worth
+checking before, not after). If you're already in this state: mount
+`/boot` for real (check the actual device with `lsblk` — don't assume
+`mmcblk0`), then force the cached kernel package to reinstall now that
+`/boot` exists —
+`pacman -U --overwrite '*' /var/cache/pacman/pkg/linux-aarch64-<version>-aarch64.pkg.tar.xz`
+— followed by `mkinitcpio -P` and a reboot. **Fix:** `install-firstboot.sh`
+now checks `/boot` is actually mounted *before* touching pacman at all,
+and fails fast with a clear message instead of silently corrupting the
+install.
+
+**`hwclock --systohc` fails with "Cannot access the Hardware Clock via
+any known method."** The Pi has no battery-backed RTC out of the box, so
+there's nothing for `hwclock` to sync to — this isn't a config problem,
+it's expected on stock hardware (only add-on RTC HATs provide
+`/dev/rtc0`). **Fix:** `install-firstboot.sh` only runs
+`hwclock --systohc` if `/dev/rtc0` exists. The same fix was needed
+separately in the `server-automation` Ansible project's `common` role,
+which called the same command unconditionally on every host.
+
+**`nmcli`/`iwctl` don't do anything useful even though `iwd` and
+`networkmanager` are both installed.** `install-firstboot.sh` installed
+both packages but never enabled `iwd.service`, and NetworkManager
+defaults to a `wpa_supplicant` backend that isn't installed at all — so
+NetworkManager has no working WiFi backend regardless of `iwd` being
+present. **Fix:** `install-firstboot.sh` now writes
+`/etc/NetworkManager/conf.d/wifi_backend.conf` (`wifi.backend=iwd`) and
+enables `iwd`, so `nmcli device wifi connect` works after the first
+reboot with no manual backend wiring.

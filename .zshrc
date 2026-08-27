@@ -5,11 +5,16 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# No ~/.p10k.zsh is deployed on a fresh box; suppress the interactive
+# "p10k configure" wizard on first shell start. Run `p10k configure` by hand
+# once and commit the resulting ~/.p10k.zsh to customize the prompt.
+typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
 # Path to your oh-my-zsh installation.
-export ZSH="/home/$USER/.oh-my-zsh"
+export ZSH="$HOME/.oh-my-zsh"
 
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time oh-my-zsh is loaded, in which case,
@@ -116,9 +121,10 @@ clear
 fastfetch
 alias vim='nvim'
 
-export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+export PATH="$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-eval `keychain --agents ssh --eval ljlee_id`
+# Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id).
+[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain --agents ssh --eval ljlee_id)"
 export GPG_TTY=$(tty)

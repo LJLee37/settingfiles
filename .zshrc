@@ -126,5 +126,5 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 # Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id).
-[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain --agents ssh --eval ljlee_id)"
+[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain add --eval --quiet ljlee_id)"
 export GPG_TTY=$(tty)

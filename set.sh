@@ -2,14 +2,13 @@
 # Run as the normal user after install2.sh: pull in dotfiles, oh-my-zsh, tmux,
 # vim-plug, nvm/yarn. set -e + existence guards so it is safe to re-run.
 set -euo pipefail
-sudo pacman -Syu htop nodejs yarn keychain clang fastfetch
+sudo pacman -Syu htop nodejs yarn keychain clang fastfetch python-pynvim
 scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id ~/.ssh/ljlee_id
 scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
 cat ~/.ssh/ljlee_id.pub >> ~/.ssh/authorized_keys
 # oh-my-zsh: git clone instead of the upstream install.sh, which runs chsh,
 # overwrites ~/.zshrc, and exec's zsh at the end (all unwanted here).
 [ -d ~/.oh-my-zsh ] || git clone --depth=1 https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
-python3 -m pip install neovim
 # Keep the very first ~/.zshrc as the backup; don't clobber it on re-runs, and
 # tolerate a fresh box that has no ~/.zshrc yet.
 if [ ! -e ~/.zshrc.bak ] && [ -e ~/.zshrc ]; then

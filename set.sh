@@ -3,9 +3,18 @@
 # vim-plug, nvm/yarn. set -e + existence guards so it is safe to re-run.
 set -euo pipefail
 sudo pacman -Syu htop nodejs yarn keychain clang fastfetch python-pynvim
-scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id ~/.ssh/ljlee_id
-scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
-# Append our pubkey to authorized_keys only once (safe to re-run).
+# Restore the SSH identity (ljlee_id, authorized_keys, known_hosts, ...) from the
+# clean-reinstall migration archive on the surviving /srv pool -- a freshly
+# reinstalled box has no key and no known_hosts entry to scp it off rpi.
+# Build the archive on the OLD box first:  tar czpf "$SSH_ARCHIVE" -C ~ .ssh
+SSH_ARCHIVE="${SSH_ARCHIVE:-/srv/server-migration/snapshot/ssh-ljlee.tgz}"
+if [ ! -e ~/.ssh/ljlee_id ]; then
+  test -e "$SSH_ARCHIVE" || { echo "missing $SSH_ARCHIVE -- create it on the old box first" >&2; exit 1; }
+  tar xzpf "$SSH_ARCHIVE" -C ~
+fi
+chmod 700 ~/.ssh
+[ -e ~/.ssh/authorized_keys ] && chmod 600 ~/.ssh/authorized_keys
+# Make sure our pubkey is authorized (no-op if the restored archive already has it).
 grep -qxF "$(cat ~/.ssh/ljlee_id.pub)" ~/.ssh/authorized_keys 2>/dev/null \
   || cat ~/.ssh/ljlee_id.pub >> ~/.ssh/authorized_keys
 # oh-my-zsh: git clone instead of the upstream install.sh, which runs chsh,

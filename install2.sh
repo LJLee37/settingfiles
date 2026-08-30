@@ -1,7 +1,12 @@
 #!/bin/bash
 
-# run hwclock to generate /etc/adjtime
-hwclock --systohc
+# run hwclock to generate /etc/adjtime (skip if there is no hardware RTC,
+# e.g. in a VM -- hwclock then fails with "Cannot access the Hardware Clock")
+if [[ -e /dev/rtc0 ]]; then
+  hwclock --systohc
+else
+  echo "no /dev/rtc0 (no hardware RTC) -- skipping hwclock"
+fi
 
 # edit /etc/locale.gen to add needed locales
 echo en_US.UTF-8 UTF-8 >> /etc/locale.gen

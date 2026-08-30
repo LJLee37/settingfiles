@@ -5,6 +5,11 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
+# No ~/.p10k.zsh is deployed on a fresh box; suppress the interactive
+# "p10k configure" wizard on first shell start. Run `p10k configure` by hand
+# once and commit the resulting ~/.p10k.zsh to customize the prompt.
+typeset -g POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+
 # If you come from bash you might have to change your $PATH.
 # export PATH=$HOME/bin:/usr/local/bin:$PATH
 
@@ -116,8 +121,10 @@ clear
 fastfetch
 alias vim='nvim'
 
-export PATH="$HOME/.local/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-eval `keychain --agents ssh --eval ljlee_id`
+export PATH="$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+# Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id),
+# and use the keychain 3.x subcommand syntax (2.x --agents is deprecated).
+[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain add --eval --quiet ljlee_id)"
 export GPG_TTY=`tty`
 #export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 

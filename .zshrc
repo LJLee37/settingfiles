@@ -121,7 +121,9 @@ clear
 fastfetch
 alias vim='nvim'
 
-export PATH="$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+# ~/.local/bin: uv tool / pip --user / hermes 등. 여기 명시해 두면 Nous Hermes
+# install.sh 의 setup_path 가 PATH 줄을 .zshrc 에 append 하지 않는다(grep guard).
+export PATH="$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"

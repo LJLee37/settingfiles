@@ -127,6 +127,9 @@ export PATH="$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+# rustup: installed with --no-modify-path, so source the env here instead of
+# letting the installer append its own line. Adds ~/.cargo/bin to PATH.
+[ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
 # Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id).
 [ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain add --eval --quiet ljlee_id)"
 export GPG_TTY=$(tty)

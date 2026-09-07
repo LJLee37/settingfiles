@@ -14,9 +14,9 @@ nvm alias default 'lts/*'
 curl --compressed -o- -L https://yarnpkg.com/install.sh | bash
 mkdir ~/.config
 mkdir ~/.config/nvim
-cp ~/gitRepos/Personal/settingfiles/init.vim ~/.config/nvim/init.vim
+cp ~/gitRepos/settingfiles/init.vim ~/.config/nvim/init.vim
 mv ~/.zshrc ~/.zshrc.bak
-cp ~/gitRepos/Personal/settingfiles/.zshrc ~/.zshrc
+cp ~/gitRepos/settingfiles/.zshrc ~/.zshrc
 ln -s ~/.config/nvim/init.vim ~/init.vim
 nvim +PlugInstall +qall
 

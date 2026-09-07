@@ -130,6 +130,8 @@ export NVM_DIR="$HOME/.nvm"
 # rustup: installed with --no-modify-path, so source the env here instead of
 # letting the installer append its own line. Adds ~/.cargo/bin to PATH.
 [ -s "$HOME/.cargo/env" ] && \. "$HOME/.cargo/env"
-# Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id).
-[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain add --eval --quiet ljlee_id)"
+# Only start keychain if the key actually exists (a fresh box has no key yet).
+# Key rotated 2026-09-07: the old RSA ljlee_id was on a compromised host and has
+# been revoked and destroyed. Do not reintroduce that name.
+[ -f "$HOME/.ssh/ljlee_id_ed25519" ] && eval "$(keychain add --eval --quiet ljlee_id_ed25519)"
 export GPG_TTY=$(tty)

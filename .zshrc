@@ -122,9 +122,11 @@ fastfetch
 alias vim='nvim'
 
 export PATH="$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-# Only start keychain if the key actually exists (a fresh box has no ~/.ssh/ljlee_id),
+# Only start keychain if the key actually exists (a fresh box has no key yet),
 # and use the keychain 3.x subcommand syntax (2.x --agents is deprecated).
-[ -f "$HOME/.ssh/ljlee_id" ] && eval "$(keychain add --eval --quiet ljlee_id)"
+# Key rotated 2026-09-07: the old RSA ljlee_id was on a compromised host and has
+# been revoked and destroyed. Do not reintroduce that name.
+[ -f "$HOME/.ssh/ljlee_id_ed25519" ] && eval "$(keychain add --eval --quiet ljlee_id_ed25519)"
 export GPG_TTY=`tty`
 #export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 

@@ -94,7 +94,8 @@ wired NIC via DHCP.
   `install0-disks.sh`; explicit `ljlee` user + `%wheel` sudo; `/srv` fstab line.
 - **changes**: `LANG=en_US.UTF-8` (not `en_GB`); locale set adds `ko_KR.EUC-KR`
   and uses bare `eo` (not `eo.UTF-8`); GRUB `--bootloader-id=Arch --removable` with
-  a fixed `/etc/default/grub` (`GRUB_TIMEOUT=0`, `nomodeset text`); timezone symlink
+  a fixed `/etc/default/grub` (`GRUB_TIMEOUT=0`, `text` - no `nomodeset`, so a
+  monitor plugged in after a headless boot still lights up); timezone symlink
   written in-chroot as `/usr/share/zoneinfo/…` (the `arch` branch's `/mnt/…`-prefixed
   target dangles after reboot); `hwclock` guarded on `/dev/rtc0`.
 - **drops**: `install-gnome.sh`, `install-graphical-programs.sh`, `install-steam.sh`.

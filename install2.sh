@@ -76,11 +76,15 @@ else
 fi
 
 echo "==> GRUB (UEFI, /boot = ESP)"
+# No `nomodeset`: it keeps nouveau off the GPU, leaving only the firmware (GOP)
+# framebuffer via simpledrm. After a headless boot the GOP never lights a port,
+# so a monitor plugged in later stays black until the next reboot. After install,
+# server-automation's grub_cmdline role owns this line - keep the two in sync.
 cat > /etc/default/grub <<'EOF'
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=0
 GRUB_DISTRIBUTOR="Arch"
-GRUB_CMDLINE_LINUX_DEFAULT="nomodeset text"
+GRUB_CMDLINE_LINUX_DEFAULT="text"
 GRUB_CMDLINE_LINUX=""
 GRUB_PRELOAD_MODULES="part_gpt part_msdos"
 GRUB_TIMEOUT_STYLE=menu

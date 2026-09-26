@@ -49,8 +49,11 @@ if ! grep -qE '^[[:space:]]*[^#[:space:]]' /mnt/etc/fstab 2>/dev/null; then
     genfstab -U /mnt >> /mnt/etc/fstab
 fi
 # NAS pool -> /srv : genfstab cannot see it (not mounted under /mnt). Add once.
+# Same options as server-automation roles/srv_mount (srv_mount_options). The pool
+# already has a free space tree, so plain `space_cache` (v1) would fail to mount
+# ("cannot disable free-space-tree") and drop the first boot to emergency.
 if ! grep -q "$SRV_POOL_UUID" /mnt/etc/fstab; then
-    printf 'UUID=%s\t/srv\tbtrfs\trw,relatime,space_cache\t0 0\n' "$SRV_POOL_UUID" >> /mnt/etc/fstab
+    printf 'UUID=%s\t/srv\tbtrfs\trw,relatime,space_cache=v2,user_subvol_rm_allowed,subvol=/\t0 0\n' "$SRV_POOL_UUID" >> /mnt/etc/fstab
 fi
 echo "----- /mnt/etc/fstab -----"; grep -vE '^[[:space:]]*(#|$)' /mnt/etc/fstab || true; echo "--------------------------"
 

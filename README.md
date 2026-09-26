@@ -45,7 +45,9 @@ you hit a coc error.
    yourself, then run `install1.sh` (`pacstrap` + `genfstab` + timezone).
 2. `arch-chroot /mnt` and run `install2.sh` (locale, hostname, user account,
    GRUB + `intel-ucode`, enable core services).
-3. Reboot into the new system, then run `set.sh` to pull in dotfiles.
+3. Reboot into the new system, then run `set.sh` to pull in dotfiles,
+   including a symlinked `.tmux.conf` (a standalone tmux config with the Oh
+   my tmux look but no `~/.tmux` clone or shell layer).
 4. Optional, as needed: `install-gnome.sh` (GNOME desktop),
    `install-graphical-programs.sh` (browser/Discord/AUR apps),
    `install-steam.sh` (Steam + 32-bit graphics libs), `set-hibernate.sh`

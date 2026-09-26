@@ -63,7 +63,9 @@ firmware boot instead of GRUB, no `intel-ucode`).
    first argument on a Raspberry Pi 5 (see the script header). This does
    `pacman-key` init, a full system update, locale/timezone/hostname,
    creates a user account, and enables NetworkManager/bluetooth/sshd.
-3. Reboot, log in as that user, then run `set.sh` to pull in dotfiles.
+3. Reboot, log in as that user, then run `set.sh` to pull in dotfiles
+   (this also symlinks `.tmux.conf`, a standalone tmux config — Oh my
+   tmux's look without its shell layer).
 4. `backup.sh` makes a full-system + boot-partition backup and `scp`s it
    to `ljlee@server.ljlee37.com:/srv/netatalk/PersonalData/RpiBackups/`.
 

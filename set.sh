@@ -11,9 +11,9 @@ set -euo pipefail
 P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 [ -d "$P10K_DIR" ] || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
 
-[ -d ~/.tmux ] || git clone https://github.com/gpakosz/.tmux.git ~/.tmux
-ln -s -f ~/.tmux/.tmux.conf ~/.tmux.conf
-cp ~/.tmux/.tmux.conf.local ~/
+# tmux: standalone config, no ~/.tmux clone needed. Symlink (not copy) so
+# git pull updates it and matches the Ansible dotfiles role's symlink.
+ln -sfn ~/gitRepos/settingfiles/.tmux.conf ~/.tmux.conf
 
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim

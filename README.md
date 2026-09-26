@@ -9,8 +9,8 @@ Services (MariaDB, netatalk/AFP, avahi, Docker, no-ip2, ufw, cron jobs) are **no
 set up here — they are owned by the `server-automation` Ansible repo. This branch
 only gets the machine to a booting, reachable base system plus the user shell env.
 
-> `.vimrc`, `.zshrc`, `init.vim`, `set.sh` are inherited from `arch` and kept in
-> sync by hand. If you touch shared parts, port the change to the other branches.
+> `.vimrc`, `.zshrc`, `.tmux.conf`, `init.vim`, `set.sh` are inherited from `arch`
+> and kept in sync by hand. If you touch shared parts, port the change to the other branches.
 
 ## Disk layout
 
@@ -73,7 +73,7 @@ this branch (`git clone -b main-server … && cd settingfiles`):
 | `install0-disks.sh` | live env | partition + LVM cache + mkfs.btrfs + subvols (destructive) |
 | `install1.sh` | live env | mount `/mnt`, pacstrap, fstab, hand off to chroot |
 | `install2.sh` | chroot | timezone, locale, hostname, initramfs, user, GRUB, services |
-| `set.sh` | new system, as user | dotfiles + oh-my-zsh + nvm/yarn + nvim plugins + SSH restore |
+| `set.sh` | new system, as user | dotfiles + tmux config (symlink) + oh-my-zsh + nvm/yarn + nvim plugins + SSH restore |
 | `set-hibernate.sh` | new system / chroot | `resume=UUID=<swap>` on the GRUB cmdline |
 
 ## Package set (`install1.sh` pacstrap)

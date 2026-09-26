@@ -42,10 +42,9 @@ nvm alias default 'lts/*'
 yarn global add neovim
 P10K_DIR="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
 [ -d "$P10K_DIR" ] || git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$P10K_DIR"
-[ -d ~/.tmux ] || git clone https://github.com/gpakosz/.tmux.git ~/.tmux
-ln -s -f ~/.tmux/.tmux.conf ~/.tmux.conf
-# Don't overwrite local tmux tweaks on a re-run.
-[ -e ~/.tmux.conf.local ] || cp ~/.tmux/.tmux.conf.local ~/
+# Standalone tmux config (no ~/.tmux clone needed); symlink so `git pull`
+# keeps it current and matches the Ansible dotfiles role's symlink for it.
+ln -sfn ~/gitRepos/settingfiles/.tmux.conf ~/.tmux.conf
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 mkdir -p ~/.config/nvim

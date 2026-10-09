@@ -52,3 +52,10 @@ you hit a coc error.
    `install-graphical-programs.sh` (browser/Discord/AUR apps),
    `install-steam.sh` (Steam + 32-bit graphics libs), `set-hibernate.sh`
    (resume-from-hibernate kernel/GRUB config).
+5. Control node only: `install-control-node.sh` turns this machine into the
+   `server-automation` control node and keeps it current on re-runs (pacman
+   tools, AUR `claude-code`, `server-automation` and `worklog` clones, commit
+   signing, SSH certificate setup, the `github.com` SSH block, Ansible
+   collections, lid-on-AC, the Claude Code mods). `--check` only reports.
+   It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what
+   it cannot do by hand at the end (gh login, `host_vars/*.yml`, vault password).

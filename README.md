@@ -9,7 +9,7 @@ matches your target machine, not `master` directly.
 | Branch | Purpose | Notes |
 |---|---|---|
 | `master` | Common base | Shared dotfiles only; starting point for new OS branches |
-| `arch` | Arch Linux (x86_64) | GNOME desktop, Steam, hibernate support |
+| `arch` | Arch Linux (x86_64) | Generic install (btrfs subvolumes, optional LUKS) + per-purpose profiles; also rebuilds the portable `LJTF` control card |
 | `macOS` | macOS | Homebrew, Karabiner-Elements |
 | `ubuntu` | Ubuntu | |
 | `alpine` | Alpine Linux | Docker container use |
@@ -41,21 +41,48 @@ you hit a coc error.
 
 ## Arch Linux (x86_64) install order
 
-1. Boot the Arch ISO, partition the disk, and mount the target at `/mnt`
-   yourself, then run `install1.sh` (`pacstrap` + `genfstab` + timezone).
-2. `arch-chroot /mnt` and run `install2.sh` (locale, hostname, user account,
-   GRUB + `intel-ucode`, enable core services).
-3. Reboot into the new system, then run `set.sh` to pull in dotfiles,
-   including a symlinked `.tmux.conf` (a standalone tmux config with the Oh
-   my tmux look but no `~/.tmux` clone or shell layer).
-4. Optional, as needed: `install-gnome.sh` (GNOME desktop),
-   `install-graphical-programs.sh` (browser/Discord/AUR apps),
-   `install-steam.sh` (Steam + 32-bit graphics libs), `set-hibernate.sh`
-   (resume-from-hibernate kernel/GRUB config).
-5. Control node only: `install-control-node.sh` turns this machine into the
+The `arch` branch does two jobs with one set of scripts: a generic Arch install
+for any machine, and rebuilding the `server-automation` control node, which is
+a portable SD card (`hosts/ljtf.env`) meant to boot on any computer. The card
+is simply the generic install with more profiles plus `install-control-node.sh`.
+
+Per-machine values live in `hosts/<machine>.env` (copy `hosts/example.env`).
+Switches: `PORTABLE` (initramfs with every storage/keyboard driver plus a
+fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
+`VAULT` (restore an existing LUKS partition image bit-for-bit), and
+`DISK_BYTES` (refuse to wipe any disk of a different size).
+
+1. `sudo ./install0-disks.sh hosts/X.env <disk> [vault.img]` wipes the disk
+   and lays out ESP | (vault) | root, with root as (LUKS2 →) btrfs and the
+   subvolumes `@ @home @snapshots @var_log @pkg`. It runs from the Arch ISO
+   or from any running Arch box (e.g. main-server, via the card in a USB
+   reader). It refuses a mounted or open disk.
+2. `sudo ./install1.sh hosts/X.env <disk>` mounts the target at
+   `/mnt/install-<prefix>`, pacstraps `profiles/base.txt`, writes fstab and
+   crypttab, copies this repo in, and runs `install2.sh` in the chroot (locale,
+   hostname, user, initramfs, GRUB on the removable path with `--no-nvram`,
+   NetworkManager). Safe to re-run.
+3. Optional, still in the chroot:
+   `sudo arch-chroot /mnt/install-<prefix> /home/<user>/gitRepos/settingfiles/install-profile.sh <profiles>`.
+4. After the first boot, as the user: `./set.sh` (zsh, oh-my-zsh, p10k with
+   its fonts, dotfiles as symlinks into this repo, nvm), then
+   `./install-profile.sh <profiles>` (re-runs fill in anything missing,
+   including AUR packages that cannot be built as root).
+5. LUKS machines: `sudo ./luks-fido2.sh` enrolls FIDO2 tokens A and B on every
+   LUKS partition of the root disk and test-opens each one with each token,
+   so each partition opens with its own passphrase, token A, or token B.
+6. Control node only: `install-control-node.sh` turns this machine into the
    `server-automation` control node and keeps it current on re-runs (pacman
    tools, AUR `claude-code`, `server-automation` and `worklog` clones, commit
    signing, SSH certificate setup, the `github.com` SSH block, Ansible
    collections, lid-on-AC, the Claude Code mods). `--check` only reports.
    It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what
    it cannot do by hand at the end (gh login, `host_vars/*.yml`, vault password).
+
+Profiles are `profiles/<name>.txt` (one package per line, `aur:<name>` for AUR)
+plus an optional `profiles/<name>.sh` with `pre`/`post`/`check` hooks:
+`./install-profile.sh --list` shows them, `--check` only reports.
+
+`set-hibernate.sh` predates this layout (swap partition, udev-based initramfs)
+and is not for portable machines: resuming a card on a different computer than
+the one it hibernated on corrupts its filesystem.

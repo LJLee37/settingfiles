@@ -1,0 +1,9 @@
+# 어느 컴퓨터에서나 화면, 소리, 게임이 되게 하는 펌웨어와 드라이버.
+# 부팅에 걸리는 설정(initramfs, GRUB 대기, zram, 저널 크기)은 env 의 PORTABLE=yes 를 보고 install2.sh 가 합니다.
+sof-firmware            # 요즘 노트북 상당수의 내장 사운드. 없으면 소리가 안 남
+alsa-firmware
+mesa
+vulkan-intel            # Proton 게임은 Vulkan 으로 돕니다. 그 GPU 의 드라이버가 없으면 게임이 안 됨
+vulkan-radeon
+intel-media-driver      # 영상 하드웨어 디코딩(Intel Broadwell 이후)
+power-profiles-daemon   # 노트북 전원 모드

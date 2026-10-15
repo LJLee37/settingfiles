@@ -1,0 +1,4 @@
+# 자주 쓰는 앱
+firefox
+discord
+aur:claude-desktop

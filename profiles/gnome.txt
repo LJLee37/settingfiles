@@ -1,0 +1,64 @@
+# GNOME. archinstall 처럼 그룹째 깔지 않고 쓰는 것만 이름으로 둡니다(gnome-software 등은 일부러 뺌).
+gdm
+gnome-shell
+gnome-control-center
+gnome-keyring           # gh 토큰 등 비밀값 보관
+xdg-desktop-portal-gnome
+xdg-user-dirs-gtk
+nautilus
+sushi                   # nautilus 스페이스바 미리보기
+file-roller
+gvfs-mtp                # Android
+gvfs-smb                # NAS, Windows 공유
+gvfs-afc                # iPhone
+gvfs-onedrive
+gvfs-gphoto2            # 카메라
+gvfs-nfs
+gvfs-dnssd              # 네트워크 공유 찾기
+gvfs-wsdd
+gnome-terminal
+gnome-text-editor
+loupe                   # 이미지
+papers                  # PDF
+seahorse                # 키링 내용 보기
+simple-scan
+gnome-calendar
+gnome-weather
+gnome-clocks
+gnome-calculator
+gnome-characters
+gnome-font-viewer
+gnome-disk-utility
+gnome-system-monitor
+gnome-tweaks
+gnome-backgrounds
+dconf-editor
+# 한글과 글꼴
+ibus-hangul
+noto-fonts-cjk
+noto-fonts-emoji
+# 다른 컴퓨터를 고칠 때 쓰는 GUI 도구
+impression              # ISO 를 USB 에 굽기
+gnome-connections       # 원격 데스크톱(RDP, VNC) 클라이언트
+collision               # 받은 ISO 해시 확인
+warp                    # 컴퓨터끼리 파일 전송
+gnome-boxes             # VM 으로 설치 시험
+# 게임
+five-or-more
+four-in-a-row
+gnome-2048
+gnome-chess
+gnome-klotski
+gnome-mahjongg
+gnome-mines
+gnome-nibbles
+gnome-robots
+gnome-sudoku
+gnome-taquin
+gnome-tetravex
+hitori
+iagno
+lightsoff
+quadrapassel
+swell-foop
+tali

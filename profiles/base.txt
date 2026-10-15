@@ -1,0 +1,28 @@
+# install1.sh 가 pacstrap 으로 까는 기본. 어느 기기든 같습니다.
+base
+linux
+linux-firmware
+intel-ucode         # CPU 제조사를 가리지 않게 둘 다(GRUB 이 맞는 것을 씀)
+amd-ucode
+# 부팅과 디스크
+grub
+efibootmgr
+btrfs-progs
+dosfstools
+cryptsetup
+libfido2            # LUKS 를 FIDO2 토큰으로 열 때 initramfs 가 씀
+zram-generator
+# 네트워크
+networkmanager
+openssh
+nftables
+# 셸과 편집기(set.sh 가 닷파일을 얹음)
+sudo
+zsh
+git
+neovim
+tmux
+base-devel          # AUR 빌드(makepkg)
+man-db
+man-pages
+texinfo

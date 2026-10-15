@@ -1,0 +1,9 @@
+# Steam. Proton 게임은 Vulkan 으로 돌아서 GPU 마다 32비트 드라이버도 필요합니다(NVIDIA 는 nvidia 프로필).
+steam
+vulkan-intel
+vulkan-radeon
+lib32-vulkan-intel
+lib32-vulkan-radeon
+gamemode
+lib32-gamemode
+cartridges              # 여러 런처의 게임을 한곳에서

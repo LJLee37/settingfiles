@@ -1,0 +1,31 @@
+# 다른 컴퓨터를 고칠 때
+arch-install-scripts    # pacstrap, arch-chroot, genfstab
+gptfdisk
+parted
+efibootmgr
+lvm2
+mdadm
+cryptsetup
+btrfs-progs
+xfsprogs
+f2fs-tools
+e2fsprogs
+ntfs-3g
+exfatprogs
+dosfstools
+jfsutils
+nilfs-utils
+udftools
+apfsprogs
+wimlib                  # Windows 설치 USB, WIM 이미지
+smartmontools           # 디스크 상태
+nvme-cli
+ddrescue                # 죽어 가는 디스크 복사
+testdisk                # 파티션, 지운 파일 복구(photorec)
+dmidecode
+hdparm
+rsync
+usbutils
+pciutils
+arch-wiki-docs          # 오프라인 ArchWiki(인터넷이 안 될 때)
+arch-wiki-lite

@@ -1,0 +1,5 @@
+# NVIDIA GPU(Turing 이후: GTX 16, RTX 20 이상). nvidia-utils 가 nouveau 를 막아서, 그보다 오래된
+# NVIDIA 만 달린 컴퓨터에서는 GPU 가속 없이 뜹니다.
+nvidia-open
+nvidia-utils
+lib32-nvidia-utils      # Steam(32비트)용. multilib 가 필요해 nvidia.sh 가 먼저 켭니다

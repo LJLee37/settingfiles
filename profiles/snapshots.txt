@@ -1,0 +1,3 @@
+# btrfs 루트 스냅숏. pacman 으로 설치하거나 업데이트할 때마다 snap-pac 이 전후 스냅숏을 찍습니다.
+snapper
+snap-pac

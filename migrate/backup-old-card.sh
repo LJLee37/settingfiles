@@ -20,7 +20,7 @@ VAULT_UUID=0ef9dd80-7de6-45bd-a52b-7ed47fe915fc       # 옛 sda2 (LUKS2, 마스�
 ROOT_UUID=a89abb71-b014-4802-b2fc-f36ea32b7b55        # 옛 sda4 (f2fs /)
 USB_UUID=490cd184-3bf4-4d70-b10b-2961dcb0fef4         # USB 의 ext4
 USB_DIR=ljtf-card-backup
-HOME_KEEP=(gitRepos .claude .claude.json handoffs .ssh .purple Documents Pictures
+HOME_KEEP=(gitRepos .claude .claude.json handoffs .ssh .gnupg .gitconfig .purple Documents Pictures
            .config/mozilla .local/share/keyrings .config/git .config/gh .config/dconf
            .local/share/applications)
 SYSTEM_KEEP=(etc/NetworkManager/system-connections etc/cups/printers.conf etc/cups/ppd var/lib/bluetooth)

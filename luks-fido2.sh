@@ -37,7 +37,8 @@ label() { lsblk -dno PARTLABEL "$1"; }
 
 for d in "${devs[@]}"; do
   cryptsetup isLuks "$d" || die "$d 는 LUKS 가 아닙니다"
-  [ "$(cryptsetup luksDump "$d" | awk '/^Version:/ { print $2 }')" = 2 ] || die "$d 는 LUKS2 가 아닙니다(FIDO2 는 LUKS2 만)"
+  # Not a luksDump parse: the text dump spills the token details to stderr (see fido2_slots).
+  cryptsetup isLuks --type luks2 "$d" || die "$d 는 LUKS2 가 아닙니다(FIDO2 는 LUKS2 만)"
   printf '   %-24s %-12s 토큰 %s/2\n' "$d" "$(label "$d")" "$(fido2_slots "$d")"
 done
 [ "$CHECK" -eq 1 ] && exit 0

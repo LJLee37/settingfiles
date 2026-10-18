@@ -20,8 +20,10 @@ post() {
     if ! grep -qF 'udp dport mdns accept' "$nftables_conf"; then
       todo "$nftables_conf 에 mDNS 규칙을 넣지 못했습니다(allow icmp 줄이 없음). 'udp dport mdns accept' 를 손으로 넣으세요"
     else
-      # In a chroot nft would talk to the installing host's kernel, so only reload on the running system.
-      if ! in_chroot && systemctl is-active -q nftables; then as_root systemctl reload nftables; fi
+      # In a chroot nft would talk to the installing host's kernel, so only load on the running system.
+      # Arch's nftables.service (1.1.7-3) is a oneshot without RemainAfterExit or ExecReload: it shows
+      # inactive after boot and cannot reload, so load the file directly when the unit is enabled.
+      if ! in_chroot && systemctl is-enabled -q nftables 2>/dev/null; then as_root nft -f "$nftables_conf"; fi
       did "$nftables_conf: mDNS(UDP 5353) 받음"
     fi
   fi

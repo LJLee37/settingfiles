@@ -28,7 +28,10 @@ fi
 [ ${#devs[@]} -gt 0 ] || die "LUKS 파티션이 없습니다"
 
 fido2_slots() {  # 그 LUKS2 헤더의 systemd-fido2 토큰 수
-  cryptsetup luksDump "$1" | awk '/^Tokens:/ { t = 1; next } /^[^[:space:]]/ { t = 0 } t && /systemd-fido2/ { n++ } END { print n + 0 }'
+  # Count from the JSON metadata, not the text dump: once luksDump loads systemd's fido2 token plugin
+  # for the first token, the rest of the dump goes to stderr (systemd 262, cryptsetup 2.8.8), so a
+  # stdout parse never sees a second token and the enroll loop below kept asking for token B.
+  cryptsetup luksDump --dump-json-metadata "$1" | awk '/"type": *"systemd-fido2"/ { n++ } END { print n + 0 }'
 }
 label() { lsblk -dno PARTLABEL "$1"; }
 

@@ -89,7 +89,8 @@ sudo umount -R $T && sudo cryptsetup close ljtf-root
 ```bash
 cd ~/gitRepos/settingfiles
 ./set.sh                                   # zsh, oh-my-zsh, p10k 와 글꼴, 닷파일 심링크, nvm
-./install-profile.sh portable nvidia outside rescue snapshots gnome steam apps   # AUR claude-desktop
+git pull --ff-only                         # print 프로필(프린터, 스캐너)과 설치 스크립트 수정을 받음
+./install-profile.sh portable nvidia outside rescue snapshots gnome steam apps print   # AUR claude-desktop, brlaser
 ./install-control-node.sh                  # claude-code, 서명, 인증서, github.com 블록, gh 로그인 안내
 sudo ./luks-fido2.sh                       # 루트와 vault 에 토큰 A, B 등록 후 토큰마다 열어 보기
 sudo mkinitcpio -P                         # 기본 이미지를 이 노트북에 맞춤(선택)

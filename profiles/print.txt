@@ -1,0 +1,18 @@
+# 프린터와 스캐너. 드라이버 없이 되는 기기(IPP Everywhere, AirPrint, Mopria, eSCL) 먼저, 오래된 기기용 드라이버도
+cups
+cups-filters
+cups-pk-helper          # lets GNOME Settings add printers without root
+ghostscript
+avahi                   # finds network printers and scanners (DNS-SD)
+nss-mdns                # resolves printer names under .local
+ipp-usb                 # driverless printing and scanning over USB
+sane
+sane-airscan            # driverless network scanners (eSCL, WSD)
+# Drivers for printers and scanners that are not driverless
+gutenprint
+foomatic-db-engine
+foomatic-db
+foomatic-db-ppds
+foomatic-db-gutenprint-ppds
+hplip                   # HP printers and scanners, many Samsung lasers
+aur:brlaser             # Brother lasers

@@ -29,6 +29,9 @@ WINISO=home/ljlee/Downloads/Win11_25H2_Korean_x64_v2.iso
 die() { printf '\n멈춤: %s\n' "$*" >&2; exit 1; }
 say() { printf '\n==> %s\n' "$*"; }
 [ "$(id -u)" -eq 0 ] || die "root 로 돌리세요"
+# --resume: step 1 already wrote card.img.zst and card.raw.sha256; verify them and go on from there.
+RESUME=no
+if [ "${1:-}" = --resume ]; then RESUME=yes; shift; fi
 [ $# -eq 1 ] || { sed -n 2,14p "$0"; exit 64; }
 DEST=$1
 for t in zstd sha256sum cryptsetup tar dd; do command -v "$t" >/dev/null || die "$t 가 없음"; done
@@ -44,17 +47,27 @@ ROOT=$(readlink -f "/dev/disk/by-uuid/$ROOT_UUID")
 if lsblk -nro MOUNTPOINTS "$CARD" | grep -q .; then die "$CARD 의 파티션이 마운트돼 있습니다(자동 마운트면 내리세요)"; fi
 lsblk -o NAME,SIZE,TRAN,FSTYPE,UUID "$CARD"
 
-[ ! -e "$DEST" ] || [ -z "$(ls -A "$DEST")" ] || die "$DEST 가 비어 있지 않습니다. 새 폴더를 주세요"
+if [ "$RESUME" = yes ]; then
+  [ "$(ls -A "$DEST" | tr '\n' ' ')" = "card.img.zst card.raw.sha256 " ] \
+    || die "--resume 은 card.img.zst 와 card.raw.sha256 만 있는 폴더에서 씁니다"
+else
+  [ ! -e "$DEST" ] || [ -z "$(ls -A "$DEST")" ] || die "$DEST 가 비어 있지 않습니다. 새 폴더를 주세요"
+fi
 mkdir -p "$DEST"
 chmod 700 "$DEST"   # vault 이미지와 ~/.ssh, ~/handoffs/logs(옛 평문 토큰) 가 들어갑니다
 cd "$DEST"
 
-say "1. 카드 전체 이미지(오래 걸립니다)"
-dd if="$CARD" bs=4M iflag=fullblock status=progress \
-  | tee >(sha256sum | awk '{ print $1 "  card.img" }' > card.raw.sha256) \
-  | zstd -T0 -3 -q -o card.img.zst
-wait $! 2>/dev/null || true
-for _ in $(seq 1 60); do [ -s card.raw.sha256 ] && break; sleep 1; done
+if [ "$RESUME" = yes ]; then
+  say "1. 카드 전체 이미지: 이미 떠 두었음(--resume), 대조만 합니다"
+else
+  say "1. 카드 전체 이미지(오래 걸립니다)"
+  dd if="$CARD" bs=4M iflag=fullblock status=progress \
+    | tee >(sha256sum | awk '{ print $1 "  card.img" }' > card.raw.sha256) \
+    | zstd -T0 -3 -q -o card.img.zst
+  # $! is not set here (the process substitution belongs to the pipeline's subshell) and
+  # set -u aborts on it, so poll for the hash file instead of waiting on a pid.
+  for _ in $(seq 1 60); do [ -s card.raw.sha256 ] && break; sleep 1; done
+fi
 [ -s card.raw.sha256 ] || die "card.raw.sha256 을 만들지 못했습니다"
 echo "   압축본을 풀어 대조하는 중"
 [ "$(zstd -dc card.img.zst | sha256sum | awk '{ print $1 }')" = "$(awk '{ print $1 }' card.raw.sha256)" ] \

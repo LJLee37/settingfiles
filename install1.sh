@@ -42,7 +42,10 @@ pacstrap -K "$TARGET" $(read_list profiles/base.txt)
 say "fstab"
 if ! grep -qE '^[[:space:]]*[^#[:space:]]' "$TARGET/etc/fstab"; then
   # subvolid 는 지웁니다. 스냅숏을 @ 로 되돌리면 번호가 바뀌어 부팅이 멈춥니다(subvol= 이름만 남김).
-  genfstab -U "$TARGET" | sed -E 's/,subvolid=[0-9]+//' >> "$TARGET/etc/fstab"
+  # Drop swap entries: genfstab copies the installing host's active swaps from /proc/swaps
+  # (main-server's sda2 on 2026-10-16), which do not exist on the target. PORTABLE uses zram.
+  genfstab -U "$TARGET" | sed -E 's/,subvolid=[0-9]+//' \
+    | awk -v RS= -v ORS='\n\n' '!/[[:space:]]swap[[:space:]]/' >> "$TARGET/etc/fstab"
 fi
 grep -vE '^[[:space:]]*(#|$)' "$TARGET/etc/fstab"
 

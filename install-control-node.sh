@@ -17,7 +17,17 @@ set -euo pipefail
 REPOS="$HOME/gitRepos"
 SA="$REPOS/server-automation"
 WL="$REPOS/worklog"
-FIDO_KEY="ljlee_sk_a"                 # 서명과 로그인에 쓰는 FIDO2 키(핸들 파일 이름)
+# 서명과 로그인에 쓰는 FIDO2 키(핸들 파일 이름). 기기마다 손에 있는 토큰이 다릅니다 - 컨트롤 카드(LJTF)는
+# 토큰 A 와, 예비 컨트롤 노드(LJTF-B)는 B 와 같은 키링에 달려 있습니다. 환경변수 FIDO_KEY, 아니면 이
+# 기기의 hosts/*.env(HOST_NAME 이 /etc/hostname 과 같은 것)의 CONTROL_FIDO_KEY, 아니면 ljlee_sk_a.
+FIDO_KEY="${FIDO_KEY:-}"
+if [ -z "$FIDO_KEY" ]; then
+  for env in "$(dirname "$(readlink -f "$0")")"/hosts/*.env; do
+    [ "$(sed -n 's/^HOST_NAME=//p' "$env")" = "$(cat /etc/hostname 2>/dev/null)" ] || continue
+    FIDO_KEY=$(sed -n 's/^CONTROL_FIDO_KEY=//p' "$env")
+  done
+fi
+FIDO_KEY="${FIDO_KEY:-ljlee_sk_a}"
 AUR_DIR="$HOME/aur"
 AUR_PKGS=(claude-code)
 # 컨트롤 노드에서 쓰는 도구. ansible: 플레이북, libfido2: ssh-keygen 이 런타임에 dlopen 하는
@@ -215,13 +225,13 @@ fi
 if [ -x "$SA/scripts/ssh-cert-setup.sh" ]; then
   if grep -q '^# >>> server-automation: ssh certificate (managed) >>>' "$HOME/.ssh/config" 2>/dev/null; then
     if doing; then
-      (cd "$SA" && scripts/ssh-cert-setup.sh --no-issue >/dev/null) && ok "인증서 설정 블록과 타이머(최신으로 맞춤)"
+      (cd "$SA" && scripts/ssh-cert-setup.sh --ca "$HOME/.ssh/$FIDO_KEY" --no-issue >/dev/null) && ok "인증서 설정 블록과 타이머(최신으로 맞춤)"
     else
       ok "인증서 설정 블록 있음"
     fi
   elif doing; then
     echo "   첫 인증서를 발급합니다. PIN 과 터치를 묻습니다."
-    (cd "$SA" && scripts/ssh-cert-setup.sh)
+    (cd "$SA" && scripts/ssh-cert-setup.sh --ca "$HOME/.ssh/$FIDO_KEY")
     did "인증서 설정과 첫 발급"
   else
     todo "인증서 설정 블록 없음(server-automation 의 scripts/ssh-cert-setup.sh)"
@@ -230,7 +240,7 @@ if [ -x "$SA/scripts/ssh-cert-setup.sh" ]; then
     ok "사용자 인증서 유효"
   else
     todo "사용자 인증서가 없거나 곧 끝남"
-    manual+=("cd $SA && scripts/ssh-cert-issue.sh 로 오늘 인증서를 받으세요(PIN + 터치). 노드 접속과 check, apply 에 필요합니다.")
+    manual+=("cd $SA && scripts/ssh-cert-issue.sh --ca ~/.ssh/$FIDO_KEY 로 오늘 인증서를 받으세요(PIN + 터치). 노드 접속과 check, apply 에 필요합니다.")
   fi
 else
   todo "server-automation 이 없어 인증서 설정을 건너뜀"
@@ -256,10 +266,15 @@ if [ -f "$SA/requirements.yml" ]; then
     ok "컬렉션은 --check 에서 보지 않음(설치 때 ansible-galaxy 가 이미 있는 것은 건너뜀)"
   fi
 fi
-# 노드별 실제 값과 호스트 인증서는 커밋하지 않아(gitignore) clone 으로 오지 않습니다.
+# 노드별 실제 값은 평문으로는 커밋하지 않고(gitignore), 2026-10-21 부터 ansible-vault 봉인본
+# (host_vars/<노드>.yml.vault)이 clone 으로 옵니다. 봉인본에서 평문을 되살리는 것은 vault 비밀번호가
+# 필요해 손으로 합니다. 평문과 봉인본이 같은지는 site.yml 의 첫 play 가 실행 때마다 봅니다.
 for h in main-server raspi cloud-vpn; do
   if [ -f "$SA/host_vars/$h.yml" ]; then
     ok "host_vars/$h.yml"
+  elif [ -f "$SA/host_vars/$h.yml.vault" ]; then
+    todo "host_vars/$h.yml 없음(봉인본은 있음)"
+    manual+=("cd $SA && scripts/host-vars.sh unseal 로 host_vars 를 봉인본에서 되살리세요(vault 비밀번호).")
   else
     todo "host_vars/$h.yml 없음"
     manual+=("host_vars/$h.yml: 백업에서 되살리거나 $h.yml.example 을 복사해 실제 값을 채우세요.")

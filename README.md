@@ -45,6 +45,9 @@ The `arch` branch does two jobs with one set of scripts: a generic Arch install
 for any machine, and rebuilding the `server-automation` control node, which is
 a portable SD card (`hosts/ljtf.env`) meant to boot on any computer. The card
 is simply the generic install with more profiles plus `install-control-node.sh`.
+`hosts/ljtf-b.env` is the spare control node, a 32GB USB stick built the same
+way: the card hangs on one keyring with FIDO2 token A, the spare on another with
+token B, so losing either keyring leaves a working control node and token.
 
 Per-machine values live in `hosts/<machine>.env` (copy `hosts/example.env`).
 Switches: `PORTABLE` (initramfs with every storage/keyboard driver plus a
@@ -78,6 +81,9 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
    collections, lid-on-AC, the Claude Code mods). `--check` only reports.
    It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what
    it cannot do by hand at the end (gh login, `host_vars/*.yml`, vault password).
+   The token it signs and logs in with is `CONTROL_FIDO_KEY` from the env whose
+   `HOST_NAME` matches this machine (`ljlee_sk_a` on the card, `ljlee_sk_b` on
+   the spare); `FIDO_KEY=... ./install-control-node.sh` overrides it.
 
 Profiles are `profiles/<name>.txt` (one package per line, `aur:<name>` for AUR)
 plus an optional `profiles/<name>.sh` with `pre`/`post`/`check` hooks:

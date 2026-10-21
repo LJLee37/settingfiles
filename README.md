@@ -45,9 +45,9 @@ The `arch` branch does two jobs with one set of scripts: a generic Arch install
 for any machine, and rebuilding the `server-automation` control node, which is
 a portable SD card (`hosts/ljtf.env`) meant to boot on any computer. The card
 is simply the generic install with more profiles plus `install-control-node.sh`.
-`hosts/ljtf-b.env` is the spare control node, a 32GB USB stick built the same
-way: the card hangs on one keyring with FIDO2 token A, the spare on another with
-token B, so losing either keyring leaves a working control node and token.
+`hosts/ljusb.env` is the spare control node LJUSB, a 32GB USB stick built the
+same way: the card hangs on one keyring with FIDO2 token A, the spare on another
+with token B, so losing either keyring leaves a working control node and token.
 
 Per-machine values live in `hosts/<machine>.env` (copy `hosts/example.env`).
 Switches: `PORTABLE` (initramfs with every storage/keyboard driver plus a

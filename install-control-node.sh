@@ -18,7 +18,7 @@ REPOS="$HOME/gitRepos"
 SA="$REPOS/server-automation"
 WL="$REPOS/worklog"
 # 서명과 로그인에 쓰는 FIDO2 키(핸들 파일 이름). 기기마다 손에 있는 토큰이 다릅니다 - 컨트롤 카드(LJTF)는
-# 토큰 A 와, 예비 컨트롤 노드(LJTF-B)는 B 와 같은 키링에 달려 있습니다. 환경변수 FIDO_KEY, 아니면 이
+# 토큰 A 와, 예비 컨트롤 노드(LJUSB)는 B 와 같은 키링에 달려 있습니다. 환경변수 FIDO_KEY, 아니면 이
 # 기기의 hosts/*.env(HOST_NAME 이 /etc/hostname 과 같은 것)의 CONTROL_FIDO_KEY, 아니면 ljlee_sk_a.
 FIDO_KEY="${FIDO_KEY:-}"
 if [ -z "$FIDO_KEY" ]; then

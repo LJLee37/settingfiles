@@ -17,6 +17,7 @@ gvfs-nfs
 gvfs-dnssd              # 네트워크 공유 찾기
 gvfs-wsdd
 gnome-terminal
+wl-clipboard            # Wayland 클립보드(wl-copy). GNOME Terminal 이 OSC 52 를 안 받아 tmux 가 이걸로 복사
 gnome-text-editor
 loupe                   # 이미지
 papers                  # PDF

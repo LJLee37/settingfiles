@@ -17,17 +17,22 @@ set -euo pipefail
 REPOS="$HOME/gitRepos"
 SA="$REPOS/server-automation"
 WL="$REPOS/worklog"
+HERE="$(dirname "$(readlink -f "$0")")"
+# 이 기기의 hosts/*.env(HOST_NAME 이 /etc/hostname 과 같은 것). env 는 source 하지 않고 sed 로 한 줄씩 읽습니다.
+host_env=""
+for env in "$HERE"/hosts/*.env; do
+  [ "$(sed -n 's/^HOST_NAME=//p' "$env")" = "$(cat /etc/hostname 2>/dev/null)" ] || continue
+  host_env="$env"
+done
+env_value() { [ -z "$host_env" ] || sed -n "s/^$1=//p" "$host_env"; }
 # 서명과 로그인에 쓰는 FIDO2 키(핸들 파일 이름). 기기마다 손에 있는 토큰이 다릅니다 - 컨트롤 카드(LJTF)는
 # 토큰 A 와, 예비 컨트롤 노드(LJUSB)는 B 와 같은 키링에 달려 있습니다. 환경변수 FIDO_KEY, 아니면 이
-# 기기의 hosts/*.env(HOST_NAME 이 /etc/hostname 과 같은 것)의 CONTROL_FIDO_KEY, 아니면 ljlee_sk_a.
-FIDO_KEY="${FIDO_KEY:-}"
-if [ -z "$FIDO_KEY" ]; then
-  for env in "$(dirname "$(readlink -f "$0")")"/hosts/*.env; do
-    [ "$(sed -n 's/^HOST_NAME=//p' "$env")" = "$(cat /etc/hostname 2>/dev/null)" ] || continue
-    FIDO_KEY=$(sed -n 's/^CONTROL_FIDO_KEY=//p' "$env")
-  done
-fi
+# 기기 env 의 CONTROL_FIDO_KEY, 아니면 ljlee_sk_a.
+FIDO_KEY="${FIDO_KEY:-$(env_value CONTROL_FIDO_KEY)}"
 FIDO_KEY="${FIDO_KEY:-ljlee_sk_a}"
+# Claude Code 작업 시간을 헤르메스 노드에 보낼지(9절). 환경변수 CC_TIMELOG_PUSH, 아니면 이 기기 env 의
+# CONTROL_CC_TIMELOG_PUSH. yes 가 아니면 보내지 않습니다.
+CC_TIMELOG_PUSH="${CC_TIMELOG_PUSH:-$(env_value CONTROL_CC_TIMELOG_PUSH)}"
 AUR_DIR="$HOME/aur"
 AUR_PKGS=(claude-code)
 # 컨트롤 노드에서 쓰는 도구. ansible: 플레이북, libfido2: ssh-keygen 이 런타임에 dlopen 하는
@@ -337,6 +342,88 @@ else
       todo "$mod 설치 안 됨"
     fi
   done
+fi
+
+# --- 9. Claude Code 작업 시간 보내기 ------------------------------------------------
+# 이 기기에서 한 Claude Code 작업도 헤르메스 노드의 장부 시간 기록에 넣습니다(2026-10-26 사용자 결정). user 타이머가
+# 30분마다 server-automation clone 의 cc-activity 로 turn 목록(프롬프트 내용 없음)을 뽑아 main-server 와 raspi 의
+# inbox 에 ssh 로 씁니다(control-node/cc-timelog-push.sh). 받는 쪽은 server-automation 의 timelog-context.sh 입니다.
+# CONTROL_CC_TIMELOG_PUSH=yes 인 기기만 켜고, 아니면 깔려 있던 것을 끕니다.
+step "Claude Code 작업 시간 보내기 (cc-timelog-push)"
+push_bin="$HOME/.local/bin/cc-timelog-push"
+unit_dir="$HOME/.config/systemd/user"
+want_push_service='[Unit]
+Description=Claude Code 작업 turn 목록을 헤르메스 노드의 cc-timelog inbox 로 보내기 (settingfiles)
+
+[Service]
+Type=oneshot
+# settingfiles install-control-node.sh 가 씁니다(control-node/cc-timelog-push.sh). 네트워크와 인증서 실패는
+# 로그만 남기고 0 으로 끝나므로 유닛이 failed 가 되지 않습니다.
+ExecStart=%h/.local/bin/cc-timelog-push
+TimeoutStartSec=5min
+Nice=10'
+want_push_timer='[Unit]
+Description=Claude Code 작업 turn 목록 보내기 타이머 (settingfiles)
+
+[Timer]
+# 30분마다. 노드의 하루 마무리(22:30)보다 먼저 들어가게 정각과 반이 아니라 10분과 40분에 돕니다. 꺼져 있는
+# 동안 놓친 차례는 켠 뒤 한 번 돕니다(Persistent).
+OnCalendar=*:10/30
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target'
+user_file() {  # user_file <경로> <내용> : 다르면 씁니다. 썼으면 0.
+  if [ "$(cat "$1" 2>/dev/null)" = "$2" ]; then
+    ok "$1"; return 1
+  elif doing; then
+    mkdir -p "$(dirname "$1")"
+    printf '%s\n' "$2" > "$1"
+    did "$1"; return 0
+  else
+    todo "$1 없음 또는 다름"; return 1
+  fi
+}
+if [ "$CC_TIMELOG_PUSH" = yes ]; then
+  if cmp -s "$HERE/control-node/cc-timelog-push.sh" "$push_bin"; then
+    ok "$push_bin"
+  elif doing; then
+    install -D -m 755 "$HERE/control-node/cc-timelog-push.sh" "$push_bin"
+    did "$push_bin"
+  else
+    todo "$push_bin 없음 또는 다름"
+  fi
+  reload=0
+  user_file "$unit_dir/cc-timelog-push.service" "$want_push_service" && reload=1
+  user_file "$unit_dir/cc-timelog-push.timer" "$want_push_timer" && reload=1
+  if [ "$reload" -eq 1 ]; then systemctl --user daemon-reload; fi
+  if systemctl --user is-enabled -q cc-timelog-push.timer 2>/dev/null; then
+    if [ "$reload" -eq 1 ]; then systemctl --user restart cc-timelog-push.timer; fi
+    ok "cc-timelog-push.timer 켜짐"
+  elif doing; then
+    systemctl --user enable --now cc-timelog-push.timer
+    did "cc-timelog-push.timer 켬(결과는 journalctl --user -u cc-timelog-push)"
+  else
+    todo "cc-timelog-push.timer 꺼짐"
+  fi
+  cc="$SA/roles/hermes_agent/files/scripts/cc-activity"
+  if [ -x "$cc" ] && "$cc" turns --help >/dev/null 2>&1; then
+    ok "cc-activity turns ($cc)"
+  else
+    todo "server-automation 의 cc-activity 에 turns 가 없음(pull 하기 전까지 타이머는 아무것도 보내지 않음)"
+  fi
+elif [ -e "$unit_dir/cc-timelog-push.timer" ] || [ -e "$push_bin" ]; then
+  if doing; then
+    systemctl --user disable --now cc-timelog-push.timer 2>/dev/null || true
+    rm -f "$unit_dir/cc-timelog-push.timer" "$unit_dir/cc-timelog-push.service" "$push_bin"
+    systemctl --user daemon-reload
+    did "cc-timelog-push 지움(CONTROL_CC_TIMELOG_PUSH 가 yes 가 아님)"
+  else
+    todo "cc-timelog-push 가 깔려 있음(CONTROL_CC_TIMELOG_PUSH 가 yes 가 아니어서 지울 것)"
+  fi
+else
+  ok "이 기기는 보내지 않음(CONTROL_CC_TIMELOG_PUSH 가 yes 가 아님)"
 fi
 
 # --- 손으로 할 것 -----------------------------------------------------------------

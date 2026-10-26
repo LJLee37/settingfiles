@@ -78,12 +78,21 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
    `server-automation` control node and keeps it current on re-runs (pacman
    tools, AUR `claude-code`, `server-automation` and `worklog` clones, commit
    signing, SSH certificate setup, the `github.com` SSH block, Ansible
-   collections, lid-on-AC, the Claude Code mods). `--check` only reports.
+   collections, lid-on-AC, the Claude Code mods, and the `cc-timelog-push`
+   user timer). `--check` only reports.
    It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what
    it cannot do by hand at the end (gh login, `host_vars/*.yml`, vault password).
    The token it signs and logs in with is `CONTROL_FIDO_KEY` from the env whose
    `HOST_NAME` matches this machine (`ljlee_sk_a` on the card, `ljlee_sk_b` on
    the spare); `FIDO_KEY=... ./install-control-node.sh` overrides it.
+   `CONTROL_CC_TIMELOG_PUSH=yes` (set on both) turns on `cc-timelog-push.timer`:
+   every 30 minutes it runs `server-automation`'s `cc-activity turns` over the
+   last 7 days of Claude Code transcripts (times, cwd, session id and title,
+   never prompt text) and writes the JSON over ssh to
+   `~/.local/state/hermes-cc-timelog/inbox/<HOST_NAME>.json` on main-server
+   and raspi, where the 22:30 Hermes wrap-up merges it into the time log. A
+   node that is down or an expired certificate only skips that node until the
+   next run; `journalctl --user -u cc-timelog-push` shows what happened.
 
 Profiles are `profiles/<name>.txt` (one package per line, `aur:<name>` for AUR)
 plus an optional `profiles/<name>.sh` with `pre`/`post`/`check` hooks:

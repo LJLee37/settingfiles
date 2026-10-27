@@ -38,7 +38,11 @@ AUR_PKGS=(claude-code)
 # 컨트롤 노드에서 쓰는 도구. ansible: 플레이북, libfido2: ssh-keygen 이 런타임에 dlopen 하는
 # FIDO2 라이브러리, github-cli: HTTPS clone 과 push 자격증명, base-devel: AUR 빌드,
 # python-dnspython: README 의 mDNS 직접 질의, libnotify: 인증서 만료 알림(notify-send).
-PACMAN_PKGS=(git openssh libfido2 ansible github-cli base-devel python-dnspython libnotify)
+# networkmanager-strongswan: 노드의 IKEv2 VPN 에 붙는 클라이언트(main-server 의 NAS 는 VPN 안에서만
+# 열림, 2026-10-27). nm-connection-editor: 그 VPN 프로필을 만드는 GTK3 편집기 - 이 플러그인은 GTK3
+# 편집기만 싣고 있어 GNOME 설정(51, GTK4)에서는 입력 칸이 동작하지 않습니다.
+PACMAN_PKGS=(git openssh libfido2 ansible github-cli base-devel python-dnspython libnotify
+  networkmanager-strongswan nm-connection-editor)
 
 CHECK=0
 case "${1:-}" in

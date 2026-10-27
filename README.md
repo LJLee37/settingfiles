@@ -93,6 +93,14 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
    and raspi, where the 22:30 Hermes wrap-up merges it into the time log. A
    node that is down or an expired certificate only skips that node until the
    next run; `journalctl --user -u cc-timelog-push` shows what happened.
+   It also installs `networkmanager-strongswan` and `nm-connection-editor` so the
+   control node can join a node's IKEv2 VPN (main-server's SMB shares are only
+   reachable inside it). Create the profile with `nm-connection-editor`
+   (IPsec/IKEv2 (strongswan), server = the node's VPN domain, certificate empty
+   so the system CAs check the server, EAP user and password, "Request an inner
+   IP address" on): the plugin ships only a GTK3 editor, so GNOME Settings (GTK4)
+   shows its fields but they do not work. The profile is per machine and is not
+   created by the script, since the EAP password must not live in this repo.
 
 Profiles are `profiles/<name>.txt` (one package per line, `aur:<name>` for AUR)
 plus an optional `profiles/<name>.sh` with `pre`/`post`/`check` hooks:

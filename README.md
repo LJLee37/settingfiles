@@ -76,10 +76,11 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
    so each partition opens with its own passphrase, token A, or token B.
 6. Control node only: `install-control-node.sh` turns this machine into the
    `server-automation` control node and keeps it current on re-runs (pacman
-   tools, AUR `claude-code`, `server-automation` and `worklog` clones, commit
-   signing, SSH certificate setup, the `github.com` SSH block, Ansible
-   collections, lid-on-AC, the Claude Code mods, and the `cc-timelog-push`
-   user timer). `--check` only reports.
+   tools, AUR `claude-code`, `server-automation`, `worklog` and `llm-wiki`
+   clones, commit signing, SSH certificate setup, the `github.com` SSH block,
+   Ansible collections, lid-on-AC, the Claude Code mods, the `cc-timelog-push`
+   user timer, and the global `~/.claude/CLAUDE.md` from
+   `control-node/CLAUDE.md`). `--check` only reports.
    It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what
    it cannot do by hand at the end (gh login, `host_vars/*.yml`, vault password).
    The token it signs and logs in with is `CONTROL_FIDO_KEY` from the env whose

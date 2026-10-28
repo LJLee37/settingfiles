@@ -104,15 +104,16 @@ for pkg in "${AUR_PKGS[@]}"; do
 done
 
 # --- 3. 저장소 ----------------------------------------------------------------
-# server-automation 과 worklog 는 HTTPS + gh 자격증명으로 받습니다(SSH 원격은 push 마다 터치가
-# 필요합니다). gh 로그인은 브라우저가 필요해 손으로 합니다.
+# server-automation, worklog, llm-wiki 는 HTTPS + gh 자격증명으로 받습니다(SSH 원격은 push 마다 터치가
+# 필요합니다). gh 로그인은 브라우저가 필요해 손으로 합니다. llm-wiki 는 작업에서 알게 된 것을 쌓는 비공개
+# 위키입니다(10절의 전역 CLAUDE.md, 2026-10-28 사용자 결정).
 step "저장소 (~/gitRepos)"
 if ! gh auth status >/dev/null 2>&1; then
   todo "gh 로그인 안 됨"
   manual+=("gh auth login 으로 GitHub 에 로그인한 뒤 이 스크립트를 다시 돌리세요(저장소 clone 과 push 자격증명).")
 else
   if doing; then gh auth setup-git; fi
-  for repo in server-automation worklog; do
+  for repo in server-automation worklog llm-wiki; do
     dir="$REPOS/$repo"
     if [ -d "$dir/.git" ]; then
       branch=$(git -C "$dir" branch --show-current)
@@ -216,6 +217,8 @@ repo_config server-automation user.signingkey "$HOME/.ssh/$FIDO_KEY"
 repo_config server-automation gpg.ssh.allowedSignersFile "$signers"
 repo_config server-automation gpg.ssh.program "$sign_wrapper"
 repo_config worklog core.hooksPath githooks
+# llm-wiki 는 서명하지 않습니다(main-server 의 clone 과 헤르메스의 커밋도 서명하지 않음).
+repo_config llm-wiki commit.gpgsign false
 
 # --- 5. SSH: FIDO2 핸들, 사용자 인증서, github.com ------------------------------
 step "SSH"
@@ -428,6 +431,23 @@ elif [ -e "$unit_dir/cc-timelog-push.timer" ] || [ -e "$push_bin" ]; then
   fi
 else
   ok "이 기기는 보내지 않음(CONTROL_CC_TIMELOG_PUSH 가 yes 가 아님)"
+fi
+
+# --- 10. 전역 CLAUDE.md ------------------------------------------------------------
+# 이 기기의 Claude Code 세션이 모두 읽는 안내(~/.claude/CLAUDE.md)를 control-node/CLAUDE.md 에서 깝니다. 지금은
+# 작업에서 알게 된 것을 llm-wiki 에 쌓는 절 하나입니다(2026-10-28 사용자 결정). 노드에는 server-automation 의
+# agentic_coding role 이 같은 절을 깝니다. 손으로 둔 다른 파일이 있으면 덮어쓰지 않고 알립니다.
+step "전역 CLAUDE.md (~/.claude/CLAUDE.md)"
+claude_md="$HOME/.claude/CLAUDE.md"
+if cmp -s "$HERE/control-node/CLAUDE.md" "$claude_md"; then
+  ok "$claude_md"
+elif [ -e "$claude_md" ] && ! grep -q 'install-control-node.sh' "$claude_md"; then
+  todo "$claude_md 가 손으로 둔 파일이라 덮어쓰지 않음(control-node/CLAUDE.md 와 합쳐 주세요)"
+elif doing; then
+  install -D -m 644 "$HERE/control-node/CLAUDE.md" "$claude_md"
+  did "$claude_md (새 세션부터)"
+else
+  todo "$claude_md 없음 또는 다름"
 fi
 
 # --- 손으로 할 것 -----------------------------------------------------------------

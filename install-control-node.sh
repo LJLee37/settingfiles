@@ -340,7 +340,7 @@ else
   else
     todo "마켓플레이스 local-mods 등록 안 됨"
   fi
-  for mod in usage-meter; do
+  for mod in usage-meter session-board; do
     if claude plugin list --json | has_name id "$mod@local-mods"; then
       ok "$mod"
     elif doing; then

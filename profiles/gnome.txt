@@ -18,6 +18,7 @@ gvfs-dnssd              # 네트워크 공유 찾기
 gvfs-wsdd
 gnome-terminal
 ghostty                 # OSC 52 를 받는 터미널. ssh 안의 herdr, Claude Code, nvim 복사가 이 기기 클립보드로(ghostty-config)
+xdg-terminal-exec       # 터미널 앱(nvim.desktop 등)을 띄울 터미널을 고름. gnome.sh 가 Ghostty 로 정함
 wl-clipboard            # Wayland 클립보드(wl-copy). GNOME Terminal 이 OSC 52 를 안 받아 tmux 와 herdr 원격 모드가 이걸로 복사
 gnome-text-editor
 loupe                   # 이미지

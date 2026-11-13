@@ -37,6 +37,7 @@ link "$REPO/.zshrc" ~/.zshrc
 link "$REPO/.tmux.conf" ~/.tmux.conf
 link "$REPO/init.vim" ~/.config/nvim/init.vim
 link "$REPO/ghostty-config" ~/.config/ghostty/config
+link "$REPO/herdr-config" ~/.config/herdr/config.toml
 ln -sfn ~/.config/nvim/init.vim ~/init.vim
 
 export NVM_DIR="$HOME/.nvm"

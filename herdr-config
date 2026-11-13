@@ -1,0 +1,15 @@
+# herdr 설정(컨트롤 노드). set.sh 가 ~/.config/herdr/config.toml 로 링크합니다.
+# 노드(main-server, raspi)의 설정은 server-automation 의 agentic_coding role 이 관리합니다(2026-11-13 사용자 결정).
+# prefix 는 기본값(ctrl+b)을 그대로 씁니다. 키는 herdr 공식 문서 Configuration 참고, 고친 뒤 `herdr config check`.
+onboarding = false
+
+[ui]
+status_indicators = "symbols"
+
+[ui.toast]
+# 이 기기는 GNOME 데스크톱이라 알림을 데스크톱 알림으로 보냅니다(노드는 herdr 화면 안).
+delivery = "system"
+
+[theme]
+name = "catppuccin"
+auto_switch = false

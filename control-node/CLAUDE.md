@@ -41,3 +41,19 @@
   알립니다.
 - 같은 절이 노드의 CLAUDE.md(`server-automation` 의 `roles/agentic_coding/templates/CLAUDE.md.j2`)에도 있습니다.
   고칠 때 둘을 맞춥니다.
+
+## Arch 위키는 오프라인 사본을 먼저 봅니다
+
+이 기기와 Arch 노드(main-server, raspi)에는 Arch 위키 사본(`arch-wiki-docs`, `arch-wiki-lite`)이 있습니다.
+wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하므로(2026-11-13), Arch 위키가 필요하면 사본부터 봅니다.
+
+- 찾기: `wiki_width=100 wiki-search <낱말>`. `wiki_width` 를 주면 dialog 메뉴를 띄우지 않고 목록만 찍습니다.
+  한국어 문서는 `wiki_lang=ko` 를 함께 줍니다.
+- 읽기: 바로 앞 검색의 번호로 `wiki-search <번호>`(텍스트), 또는
+  `w3m -dump /usr/share/doc/arch-wiki/html/en/<제목>.html`(제목의 빈칸은 `_`).
+- 답할 때 사본의 판(`pacman -Q arch-wiki-docs`, 매달 새 판)을 함께 말합니다. 그 뒤에 바뀌었을 수 있는 내용(패키지
+  판, 하드웨어 지원)이 결론을 좌우하면 사용자에게 온라인 위키 확인을 부탁합니다.
+- 사람에게 보여 줄 때는 `wiki-search-html <낱말>` 로 엽니다. 이 기기는 GNOME 이라 `xdg-open`(웹 브라우저)으로,
+  노드는 화면이 없어 `w3m` 으로 열립니다.
+- 같은 절이 노드의 CLAUDE.md(`server-automation` 의 `roles/agentic_coding/templates/CLAUDE.md.j2`)에도 있습니다.
+  고칠 때 둘을 맞춥니다.

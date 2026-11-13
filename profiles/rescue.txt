@@ -27,5 +27,7 @@ hdparm
 rsync
 usbutils
 pciutils
-arch-wiki-docs          # 오프라인 ArchWiki(인터넷이 안 될 때)
+arch-wiki-docs          # 오프라인 ArchWiki(인터넷이 안 될 때, 사이트가 봇을 막을 때)
 arch-wiki-lite
+dialog                  # wiki-search 의 고르는 메뉴
+w3m                     # 터미널 브라우저. 위키 HTML 을 터미널에서 보고, Claude 는 w3m -dump 로 읽음

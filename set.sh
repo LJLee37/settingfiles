@@ -1,7 +1,8 @@
 #!/bin/zsh
 sudo pacman -Syu htop nodejs yarn keychain clang neofetch
-scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id ~/.ssh/ljlee_id
-scp -P 3759 ljlee@rpi.ljlee37.com:.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
+: "${KEY_SRC:?set KEY_SRC=user@host (and KEY_SRC_PORT) to fetch the key pair from; kept out of this public repo}"
+scp -P "${KEY_SRC_PORT:-22}" "$KEY_SRC":.ssh/ljlee_id ~/.ssh/ljlee_id
+scp -P "${KEY_SRC_PORT:-22}" "$KEY_SRC":.ssh/ljlee_id.pub ~/.ssh/ljlee_id.pub
 cat ~/.ssh/ljlee_id.pub >> ~/.ssh/authorized_keys
 curl -L https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
 python3 -m pip install neovim

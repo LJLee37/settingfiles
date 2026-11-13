@@ -366,6 +366,8 @@ Description=Claude Code 작업 turn 목록을 헤르메스 노드의 cc-timelog 
 Type=oneshot
 # settingfiles install-control-node.sh 가 씁니다(control-node/cc-timelog-push.sh). 네트워크와 인증서 실패는
 # 로그만 남기고 0 으로 끝나므로 유닛이 failed 가 되지 않습니다.
+# 보낼 노드(CC_TIMELOG_NODES)는 저장소 밖의 이 파일에 둡니다. 없으면 server-automation host_vars 의 ansible_host.
+EnvironmentFile=-%h/.config/cc-timelog-push.env
 ExecStart=%h/.local/bin/cc-timelog-push
 TimeoutStartSec=5min
 Nice=10'

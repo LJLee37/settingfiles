@@ -13,15 +13,30 @@
 #
 # 환경변수: CC_ACTIVITY(cc-activity 경로), CC_TIMELOG_NODES(보낼 노드, 빈칸으로 구분),
 #   CC_TIMELOG_NAME(파일 이름, 기본은 이 기기의 호스트 이름), CC_TIMELOG_DAYS(기본 7), SSH(시험용)
+#
+# 노드 주소는 이 공개 저장소에 두지 않습니다(2026-11-13 사용자 결정). user 유닛이 이 기기의
+# ~/.config/cc-timelog-push.env(저장소 밖)에서 CC_TIMELOG_NODES 를 읽고, 없으면 server-automation 의
+# host_vars(비공개, gitignore 된 평문)에서 main-server 와 raspi 의 ansible_host 를 씁니다.
 set -uo pipefail
 
-CC_ACTIVITY="${CC_ACTIVITY:-$HOME/gitRepos/server-automation/roles/hermes_agent/files/scripts/cc-activity}"
-NODES="${CC_TIMELOG_NODES:-server.ljlee37.com rpi.ljlee37.com}"
+SA="${SA:-$HOME/gitRepos/server-automation}"
+CC_ACTIVITY="${CC_ACTIVITY:-$SA/roles/hermes_agent/files/scripts/cc-activity}"
+host_vars_nodes() {  # main-server, raspi 의 ansible_host 를 빈칸으로 이어 찍음
+  local n
+  for n in main-server raspi; do
+    sed -n 's/^ansible_host:[[:space:]]*"\{0,1\}\([^"#[:space:]]*\).*/\1/p' "$SA/host_vars/$n.yml" 2>/dev/null
+  done | tr '\n' ' '
+}
+NODES="${CC_TIMELOG_NODES:-$(host_vars_nodes)}"
 NAME="${CC_TIMELOG_NAME:-$(cat /etc/hostname 2>/dev/null)}"
 DAYS="${CC_TIMELOG_DAYS:-7}"
 SSH="${SSH:-ssh}"
 INBOX=.local/state/hermes-cc-timelog/inbox   # 받는 노드의 홈 기준
 
+if [ -z "${NODES// }" ]; then
+  echo "보낼 노드를 몰라 보내지 않음(CC_TIMELOG_NODES 도 $SA/host_vars 의 ansible_host 도 없음)"
+  exit 0
+fi
 if [ ! -x "$CC_ACTIVITY" ]; then
   echo "cc-activity 가 없어 보내지 않음: $CC_ACTIVITY"
   exit 0

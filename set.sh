@@ -36,6 +36,7 @@ link() {  # link <저장소 안 파일> <놓을 곳>
 link "$REPO/.zshrc" ~/.zshrc
 link "$REPO/.tmux.conf" ~/.tmux.conf
 link "$REPO/init.vim" ~/.config/nvim/init.vim
+link "$REPO/ghostty-config" ~/.config/ghostty/config
 ln -sfn ~/.config/nvim/init.vim ~/init.vim
 
 export NVM_DIR="$HOME/.nvm"

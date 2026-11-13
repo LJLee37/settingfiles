@@ -1,0 +1,14 @@
+# Ghostty 설정. set.sh 가 ~/.config/ghostty/config 로 링크합니다.
+#
+# GNOME Terminal 대신 쓰는 까닭: OSC 52(터미널 제어 신호로 클립보드에 쓰기)를 받아, ssh 안에서 띄운 herdr,
+# Claude Code, nvim 의 복사가 이 기기의 클립보드로 옵니다. GNOME Terminal(VTE)은 보안 문제로 OSC 52 를 받지
+# 않습니다(2026-11-13). 쓰기는 허용하고, 원격이 이 기기의 클립보드를 읽는 것은 매번 묻습니다.
+clipboard-write = allow
+clipboard-read = ask
+
+# 노드에는 xterm-ghostty terminfo 가 없어, 그대로 ssh 로 붙으면 nvim, htop 이 "unknown terminal" 로 깨집니다.
+# 셸에서 ssh 를 부르면 TERM 을 xterm-256color 로 낮춰 넘깁니다(셸 통합이 켜진 zsh 에서, Ghostty 1.4 부터).
+shell-integration-features = ssh-env
+
+# powerlevel10k 가 권하는 글꼴(set.sh 가 ~/.local/share/fonts 에 깜)
+font-family = MesloLGS NF

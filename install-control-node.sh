@@ -450,6 +450,31 @@ else
   todo "$claude_md 없음 또는 다름"
 fi
 
+# --- 11. herdr --------------------------------------------------------------------
+# 노드의 herdr 를 이 기기에서 원격으로 엽니다(herdr --remote <ssh 대상>, 저장해 두려면 herdr machine add). 그러면
+# 화면이 이 기기에서 돌아 복사가 로컬 클립보드(wl-copy, gnome 프로필의 wl-clipboard)로 갑니다. ssh 안에서 띄운
+# herdr 는 OSC 52 로 복사하는데 GNOME Terminal 은 그것을 받지 않습니다(2026-11-13, Ghostty 는 받음). 노드처럼
+# 공식 설치 스크립트로 ~/.local/bin/herdr 에 깔고(server-automation roles/agentic_coding/tasks/herdr.yml), 공개
+# 최신판보다 낮으면 올립니다. 스크립트는 latest.json 의 SHA-256 으로 바이너리를 대조합니다.
+step "herdr (~/.local/bin/herdr)"
+herdr_bin="$HOME/.local/bin/herdr"
+herdr_have=$("$herdr_bin" --version 2>/dev/null | awk '{print $NF}' || true)
+herdr_latest=$(curl -fsSL --max-time 20 https://herdr.dev/latest.json 2>/dev/null \
+  | python3 -c 'import json,sys; print(json.load(sys.stdin).get("version", ""))' 2>/dev/null || true)
+if [ -n "$herdr_have" ] && { [ -z "$herdr_latest" ] \
+    || [ "$(printf '%s\n' "$herdr_latest" "$herdr_have" | sort -V | sed -n 1p)" = "$herdr_latest" ]; }; then
+  ok "herdr $herdr_have${herdr_latest:+ (공개 최신 $herdr_latest)}"
+elif doing; then
+  herdr_sh=$(mktemp)
+  curl -fsSL --max-time 60 -o "$herdr_sh" https://herdr.dev/install.sh
+  HERDR_INSTALL_DIR="$HOME/.local/bin" sh "$herdr_sh"
+  rm -f "$herdr_sh"
+  did "herdr $("$herdr_bin" --version 2>/dev/null | awk '{print $NF}')"
+else
+  todo "herdr ${herdr_have:-없음}${herdr_latest:+, 공개 최신 $herdr_latest}"
+fi
+manual+=("herdr 원격: herdr machine add <노드의 ssh 주소> 로 저장하거나 herdr --remote <노드의 ssh 주소>(주소는 server-automation 의 host_vars). 백그라운드 재접속은 인증서가 ssh-agent 에 있을 때만 됩니다.")
+
 # --- 손으로 할 것 -----------------------------------------------------------------
 manual+=("Claude Code 로그인(claude 를 한 번 실행)과, 다른 세션과 대화할 때 /remote-control.")
 manual+=("vault 비밀번호는 어디에도 저장하지 않습니다. check, apply 때 --ask-vault-pass 로 칩니다.")

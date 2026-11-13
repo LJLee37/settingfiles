@@ -5,7 +5,7 @@
 set -euo pipefail
 
 if [[ -r /root/main-server.env ]]; then . /root/main-server.env; fi
-: "${HOSTNAME_FQDN:=server.ljlee37.com}"
+: "${HOSTNAME_FQDN:?set HOSTNAME_FQDN in main-server.env (the real name is kept out of this public repo)}"
 : "${TIMEZONE:=Asia/Seoul}"
 : "${LANG_DEFAULT:=en_US.UTF-8}"
 : "${USERNAME:=ljlee}"

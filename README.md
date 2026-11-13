@@ -1,6 +1,6 @@
 # settingFiles — `main-server` branch
 
-Dotfiles **and** clean-install automation for **`server.ljlee37.com`** — a headless
+Dotfiles **and** clean-install automation for **main-server** — a headless
 Arch Linux (x86_64) box: ASUS desktop, Intel i5-6500, 32 GiB RAM. Forked from the
 `arch` branch; the GNOME/Steam/Wi-Fi bits are dropped and LVM dm-cache + btrfs,
 `sshd`, filesystem tooling, and a fixed-cmdline GRUB are added.

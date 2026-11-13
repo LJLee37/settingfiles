@@ -475,6 +475,20 @@ elif doing; then
 else
   todo "herdr ${herdr_have:-없음}${herdr_latest:+, 공개 최신 $herdr_latest}"
 fi
+# herdr 를 주 작업 환경으로 쓰므로(2026-11-13 사용자 결정) 이 기기의 Claude 에도 herdr 의 Claude 통합을 깝니다
+# (~/.claude/hooks/herdr-agent-state.sh 와 settings.json 의 SessionStart 훅 한 줄. 노드는 server-automation 의
+# agentic_coding role 이 깝니다). herdr 를 올려 통합의 판이 오르면 다시 깝니다. grep -q 는 쓰지 않습니다(pipefail 에서
+# 앞 명령이 SIGPIPE 로 끝나 "없음"으로 읽힘).
+if [ -x "$herdr_bin" ]; then
+  if "$herdr_bin" integration status 2>/dev/null | grep '^claude: current' >/dev/null; then
+    ok "herdr Claude 통합"
+  elif doing; then
+    "$herdr_bin" integration install claude >/dev/null
+    did "herdr Claude 통합(새 Claude 세션부터)"
+  else
+    todo "herdr Claude 통합 없음 또는 낡음"
+  fi
+fi
 manual+=("herdr 원격: herdr machine add <노드의 ssh 주소> 로 저장하거나 herdr --remote <노드의 ssh 주소>(주소는 server-automation 의 host_vars). 백그라운드 재접속은 인증서가 ssh-agent 에 있을 때만 됩니다.")
 
 # --- 손으로 할 것 -----------------------------------------------------------------

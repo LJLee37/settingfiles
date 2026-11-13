@@ -111,7 +111,8 @@ grub-mkconfig -o /boot/grub/grub.cfg
 grep -q 'rootflags=subvol=@' /boot/grub/grub.cfg || die "grub.cfg 에 rootflags=subvol=@ 가 없습니다"
 
 say "서비스"
-systemctl enable NetworkManager systemd-timesyncd
+# linux-modules-cleanup: kernel-modules-hook(base.txt)이 업그레이드 때 떠 둔 옛 커널 모듈을 다음 부팅에 정리합니다.
+systemctl enable NetworkManager systemd-timesyncd linux-modules-cleanup.service
 if is_yes "$PORTABLE"; then
   # 스왑 파티션 대신 압축 RAM. 플래시(SD 카드)에 스왑을 쓰지 않습니다.
   cat > /etc/systemd/zram-generator.conf <<'EOF'

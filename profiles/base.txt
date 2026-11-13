@@ -12,6 +12,7 @@ dosfstools
 cryptsetup
 libfido2            # LUKS 를 FIDO2 토큰으로 열 때 initramfs 가 씀
 zram-generator
+kernel-modules-hook # 커널을 올린 뒤에도 재부팅 전까지 모듈을 올릴 수 있게(정리 유닛은 base.sh, install2.sh)
 # 네트워크
 networkmanager
 openssh

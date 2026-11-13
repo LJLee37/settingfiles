@@ -6,9 +6,16 @@
 clipboard-write = allow
 clipboard-read = ask
 
-# 노드에는 xterm-ghostty terminfo 가 없어, 그대로 ssh 로 붙으면 nvim, htop 이 "unknown terminal" 로 깨집니다.
-# 셸에서 ssh 를 부르면 TERM 을 xterm-256color 로 낮춰 넘깁니다(셸 통합이 켜진 zsh 에서, Ghostty 1.4 부터).
-shell-integration-features = ssh-env
+# terminfo(TERM=xterm-ghostty 가 무엇을 알아듣는지 적은 목록)가 없는 서버에 그대로 ssh 로 붙으면 nvim, htop 이
+# "unknown terminal" 로 깨집니다. 관리하는 노드에는 server-automation 의 common role 이 시스템 전체에 깔아 둡니다
+# (sudo 로 도는 프로그램도 찾게). 그 밖의 서버는 셸에서 ssh 를 부를 때 Ghostty 가 사용자 ~/.terminfo 에 깔고
+# (ssh-terminfo, 한 번 깔면 기억), 그것이 안 되면 TERM 을 xterm-256color 로 낮춰 넘깁니다(ssh-env).
+# 셸 통합이 켜진 zsh 에서만 동작합니다.
+shell-integration-features = ssh-terminfo,ssh-env
+
+# 색. 기본값(배경 #282c34)은 푸르스름해 Dark Modern 으로 둡니다(2026-11-13 사용자 결정). 다른 테마는
+# ghostty +list-themes 로 미리 보고 고릅니다.
+theme = Dark Modern
 
 # powerlevel10k 가 권하는 글꼴(set.sh 가 ~/.local/share/fonts 에 깜)
 font-family = MesloLGS NF

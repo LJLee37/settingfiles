@@ -67,7 +67,8 @@ firmware boot instead of GRUB, no `intel-ucode`).
    (this also symlinks `.tmux.conf`, a standalone tmux config — Oh my
    tmux's look without its shell layer).
 4. `backup.sh` makes a full-system + boot-partition backup and `scp`s it
-   to `ljlee@server.ljlee37.com:/srv/netatalk/PersonalData/RpiBackups/`.
+   to `$BACKUP_DEST` (`user@host:/path/`, set it before running; the address is kept
+   out of this public repo).
 
 Written against a Raspberry Pi 4 Model B (64-bit) using the generic
 `ArchLinuxARM-rpi-aarch64-latest.tar.gz` image (ALARM lists this as also

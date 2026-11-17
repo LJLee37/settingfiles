@@ -27,3 +27,8 @@ base-devel          # AUR 빌드(makepkg)
 man-db
 man-pages
 texinfo
+fastfetch           # .zshrc 가 셸을 열 때마다 부름
+htop
+nodejs              # nvim 의 coc.nvim. nvm 이 없어도 nvim 이 돌게 둡니다(사용자 결정 2026-11-17)
+pnpm                # nvim 플러그인과 node provider(set.sh 가 pnpm add -g neovim). yarn 대신(2026-11-17)
+python-pynvim       # nvim 의 python provider

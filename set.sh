@@ -2,10 +2,14 @@
 # 보통 사용자로, 첫 부팅 뒤에 돌립니다: 닷파일, oh-my-zsh, powerlevel10k(글꼴 포함), tmux, vim-plug, nvm.
 # 닷파일은 이 저장소를 가리키는 심링크라 git pull 하면 바로 최신이 됩니다(노드의 dotfiles role 과 같은 방식).
 # 다시 돌려도 됩니다.
+# 패키지는 깔지 않습니다(2026-11-17 사용자 결정). 필요한 것은 base 프로필이 깝니다: install1.sh 가 pacstrap 으로
+# 깔고, 다른 방법으로 깐 기기에서는 먼저 ./install-profile.sh base 를 돌립니다.
 set -euo pipefail
 REPO=${0:A:h}
 
-sudo pacman -Syu --needed htop nodejs yarn clang fastfetch python-pynvim
+for c in git curl nvim tmux pnpm fastfetch; do
+  command -v $c >/dev/null || { echo "$c 가 없습니다. 먼저 ./install-profile.sh base 를 돌리세요"; exit 1; }
+done
 
 # 로그인 셸. install2.sh 로 만든 계정은 이미 zsh 입니다.
 case "$(getent passwd "$USER" | cut -d: -f7)" in
@@ -50,10 +54,15 @@ set +u
 set -u
 nvm install --lts
 nvm alias default 'lts/*'
-yarn global add neovim
+# nvim 의 node provider. yarn 대신 pnpm(2026-11-17 사용자 결정). pnpm 은 PNPM_HOME/bin 을 전역 bin 으로 쓰고
+# 그곳이 PATH 에 없으면 전역 설치를 거절합니다(.zshrc 도 같은 값).
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$PNPM_HOME/bin:$PATH"
+pnpm add -g neovim
 
 curl -fLo ~/.local/share/nvim/site/autoload/plug.vim --create-dirs \
      https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
-nvim --headless "+PlugInstall --sync" +qall
+# PlugClean! 은 init.vim 에서 뺀 플러그인(예: copilot.vim, 2026-11-17)의 디렉터리를 지웁니다.
+nvim --headless "+PlugClean!" "+PlugInstall --sync" +qall
 git config --global user.name "LJLee37"
 git config --global user.email "ljlee3759@gmail.com"

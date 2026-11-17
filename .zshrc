@@ -121,7 +121,8 @@ clear
 fastfetch
 alias vim='nvim'
 
-export PATH="$HOME/.local/bin:$HOME/.local/share/pnpm/bin:$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
+export PNPM_HOME="$HOME/.local/share/pnpm"
+export PATH="$HOME/.local/bin:$PNPM_HOME/bin:$PATH"
 export GPG_TTY=`tty`
 #export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 

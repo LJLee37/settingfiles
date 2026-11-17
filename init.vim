@@ -25,7 +25,6 @@ Plug 'blueyed/vim-diminactive'
 "Plug 'tomtom/tlib_vim'
 "Plug 'garbas/vim-snipmate'
 "Plug 'honza/vim-snippets'
-Plug 'github/copilot.vim'
 
 call plug#end()
 

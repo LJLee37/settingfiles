@@ -78,9 +78,13 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
 3. Optional, still in the chroot:
    `sudo arch-chroot /mnt/install-<prefix> /home/<user>/gitRepos/settingfiles/install-profile.sh <profiles>`.
 4. After the first boot, as the user: `./set.sh` (zsh, oh-my-zsh, p10k with
-   its fonts, dotfiles as symlinks into this repo, nvm), then
+   its fonts, dotfiles as symlinks into this repo, nvm, the `neovim` node
+   provider through pnpm), then
    `./install-profile.sh <profiles>` (re-runs fill in anything missing,
    including AUR packages that cannot be built as root).
+   `set.sh` installs no packages: it needs the `base` profile, which
+   `install1.sh` pacstraps; on a machine installed some other way, run
+   `./install-profile.sh base` first.
 5. LUKS machines: `sudo ./luks-fido2.sh` enrolls FIDO2 tokens A and B on every
    LUKS partition of the root disk and test-opens each one with each token,
    so each partition opens with its own passphrase, token A, or token B.

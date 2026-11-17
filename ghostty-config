@@ -19,3 +19,7 @@ theme = Dark Modern
 
 # powerlevel10k 가 권하는 글꼴(set.sh 가 ~/.local/share/fonts 에 깜)
 font-family = MesloLGS NF
+
+# Ctrl+Enter 는 Linux 기본값으로 전체화면 토글인데, 프로그램 안에서 쓰려다 화면이 바뀌어 끕니다(2026-11-17
+# 사용자 요청, LJGaming). 전체화면이 필요하면 명령 팔레트(Ctrl+Shift+P)에서 toggle_fullscreen 을 고릅니다.
+keybind = ctrl+enter=unbind

@@ -28,6 +28,14 @@ Plug 'blueyed/vim-diminactive'
 
 call plug#end()
 
+" nvim 의 node provider(set.sh 가 pnpm add -g neovim 으로 깜). pnpm 12 는 전역 패키지를
+" ~/.local/share/pnpm/global/v11/<해시>/node_modules 에 두는데 nvim 0.12 는 $(pnpm root -g)/neovim 만
+" 찾으므로 직접 알려 줍니다. 여럿이면 가장 최근 것을 씁니다.
+let s:node_hosts = glob('~/.local/share/pnpm/global/v*/*/node_modules/neovim/bin/cli.js', 0, 1)
+if !empty(s:node_hosts)
+  let g:node_host_prog = sort(s:node_hosts, {a, b -> getftime(b) - getftime(a)})[0]
+endif
+
 "autocmd VimEnter * NERDTree
 
 autocmd VimEnter * wincmd p

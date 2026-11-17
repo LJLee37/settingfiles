@@ -48,6 +48,16 @@ is simply the generic install with more profiles plus `install-control-node.sh`.
 `hosts/ljusb.env` is the spare control node LJUSB, a 32GB USB stick built the
 same way: the card hangs on one keyring with FIDO2 token A, the spare on another
 with token B, so losing either keyring leaves a working control node and token.
+`hosts/ljinst.env` is LJINST, a temporary 14.3GB USB stick for putting Arch
+next to Windows on the gaming desktop (dual boot). It is built on the control
+node and booted on the desktop, where its Claude Code follows install docs
+kept outside this repo. Only that stick gets passwordless sudo, added by its
+own build script, not by this repo. The gaming desktop's own Arch (LJGaming)
+was installed from LJINST by those docs, not with `install0-disks.sh` to
+`install2.sh`, so it has no `hosts/` file; only `set.sh` was run there. Those
+docs installed the whole `gnome` group, which brought in apps that were not
+wanted (GNOME Software, Maps, Console, GNOME Terminal and more), so the desktop
+was trimmed afterwards to match `profiles/gnome.txt`.
 
 Per-machine values live in `hosts/<machine>.env` (copy `hosts/example.env`).
 Switches: `PORTABLE` (initramfs with every storage/keyboard driver plus a

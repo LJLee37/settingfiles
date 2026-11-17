@@ -1,0 +1,17 @@
+{
+  "name": "usage-meter",
+  "version": "0.1.0",
+  "description": "Pins the 5-hour, weekly and extra-credit usage of the account under the prompt",
+  "author": {
+    "name": "ljlee"
+  },
+  "userConfig": {
+    "pollSeconds": {
+      "type": "number",
+      "title": "Poll interval (seconds)",
+      "description": "How often the usage endpoint is read; sessions on one machine share the last reading",
+      "default": 120,
+      "min": 30
+    }
+  }
+}

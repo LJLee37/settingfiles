@@ -322,6 +322,8 @@ fi
 # --- 8. Claude Code mod ------------------------------------------------------------
 # 노드와 같은 mod 를 씁니다. 노드는 role 이 폴더를 복사하지만, 여기서는 clone 의 폴더를 바로
 # 마켓플레이스로 등록하므로 server-automation 을 pull 하면 mod 도 새 판이 됩니다.
+# server-automation 을 받을 수 없는 LJGaming 은 이 저장소의 claude-mods/ 사본을 씁니다(ljgaming/install.sh,
+# 2026-11-17). 사본이 원본과 다르면 알립니다. 맞추는 것은 control-node/sync-claude-mods.sh 와 커밋입니다.
 step "Claude Code mod"
 mods="$SA/roles/agentic_coding/files/claude-mods"
 claude_version=$(claude --version 2>/dev/null | awk '{print $1}' || true)
@@ -349,6 +351,13 @@ else
       todo "$mod 설치 안 됨"
     fi
   done
+fi
+if [ -d "$mods" ]; then
+  if "$HERE/control-node/sync-claude-mods.sh" --check >/dev/null 2>&1; then
+    ok "claude-mods 사본(LJGaming 용)이 원본과 같음"
+  else
+    todo "claude-mods 사본이 server-automation 과 다름(control-node/sync-claude-mods.sh 를 돌리고 커밋)"
+  fi
 fi
 
 # --- 9. Claude Code 작업 시간 보내기 ------------------------------------------------

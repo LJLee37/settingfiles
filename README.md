@@ -57,7 +57,13 @@ was installed from LJINST by those docs, not with `install0-disks.sh` to
 `install2.sh`, so it has no `hosts/` file; only `set.sh` was run there. Those
 docs installed the whole `gnome` group, which brought in apps that were not
 wanted (GNOME Software, Maps, Console, GNOME Terminal and more), so the desktop
-was trimmed afterwards to match `profiles/gnome.txt`.
+was trimmed afterwards to match `profiles/gnome.txt`. Its Claude Code setup comes
+from `ljgaming/install.sh`, run as the user: `~/.claude/CLAUDE.md` from
+`ljgaming/CLAUDE.md`, and the Claude Code mods (usage-meter, session-board)
+from `claude-mods/`. That folder is a copy of the mods in the private
+`server-automation` repo, which the desktop cannot clone;
+`control-node/sync-claude-mods.sh` refreshes it, and
+`install-control-node.sh --check` reports when it falls behind.
 
 Per-machine values live in `hosts/<machine>.env` (copy `hosts/example.env`).
 Switches: `PORTABLE` (initramfs with every storage/keyboard driver plus a

@@ -1,0 +1,379 @@
+#!/usr/bin/env bash
+# session-boards: every Claude Code session on this node in one table, so that
+# after a reboot it is plain which sessions to start again. Needs no Claude and
+# writes nothing.
+#
+# Reads, under ~/.claude (or $CLAUDE_CONFIG_DIR):
+#   session-boards/<id>.json  the board the session-board mod keeps per session;
+#                             from 0.2.0 it carries the folder the session started in
+#   projects/*/<id>.jsonl     transcripts, for the start folder, the title and the
+#                             last activity of sessions with or without a board
+#   sessions/<pid>.json       the registry of running sessions, only to tell which
+#                             are running: a pid counts when it is alive and started
+#                             when the file says, so files left by a power cut do
+#                             not. The mode 600 files beside them are never read.
+set -euo pipefail
+shopt -s nullglob
+export LC_ALL=C.UTF-8
+
+CLAUDE_HOME=${CLAUDE_CONFIG_DIR:-$HOME/.claude}
+BOARD_DIR=$CLAUDE_HOME/session-boards
+PROJECT_DIR=$CLAUDE_HOME/projects
+REGISTRY_DIR=$CLAUDE_HOME/sessions
+NAME_CHARS=24
+GOAL_CHARS=28
+SEP=$'\x1f'
+
+staleHours=24
+recentDays=7
+showAll=0
+outputFormat=table
+
+declare -A seen=() livePid=() liveName=() liveCwd=() liveKind=()
+declare -A boardGoal=() boardDoing=() boardWaiting=() boardTodo=() boardDone=() boardUpdated=() boardCwd=()
+declare -A chatMtime=() chatCwd=() chatTitle=() chatEntry=()
+
+print_usage() {
+  cat <<'EOF'
+사용법: session-boards [--all] [--days N] [--stale-hours N] [--tsv]
+
+이 노드의 Claude Code 세션을 표로 보여 줍니다. 일이 남았는데 돌고 있지 않은 세션은
+"다시 켤 후보"로 따로 모으고 재개 명령을 붙입니다. Claude 없이 돌고, 아무것도 쓰지 않습니다.
+
+  --all            끝난 보드, 비대화형 실행, 오래된 보드 없는 세션까지 보여 줍니다
+  --days N         보드 없는 세션은 대화가 N일 안에 바뀐 것만 보여 줍니다 (기본 7)
+  --stale-hours N  보드가 N시간 넘게 갱신되지 않았으면 낡음으로 표시합니다 (기본 24)
+  --tsv            모든 칸과 재개 명령을 탭으로 나눠 냅니다
+EOF
+}
+
+die() {
+  printf 'session-boards: %s\n' "$1" >&2
+  exit 2
+}
+
+parse_args() {
+  while (($# > 0)); do
+    case $1 in
+      --all) showAll=1 ;;
+      --tsv) outputFormat=tsv ;;
+      --days | --stale-hours)
+        [[ ${2:-} =~ ^[0-9]+$ ]] || die "$1 needs a whole number"
+        if [[ $1 == --days ]]; then recentDays=$2; else staleHours=$2; fi
+        shift
+        ;;
+      -h | --help)
+        print_usage
+        exit 0
+        ;;
+      *) die "unknown argument: $1 (see --help)" ;;
+    esac
+    shift
+  done
+}
+
+# The process start time from /proc, in clock ticks since boot: the registry's
+# procStart. Fails where /proc cannot be read.
+process_start() {
+  local stat rest
+  local -a fields
+  stat=$(<"/proc/$1/stat") || return 1
+  # The command name in field 2 may hold spaces; count from after it.
+  rest=${stat##*) }
+  read -ra fields <<<"$rest"
+  printf '%s\n' "${fields[19]}"
+}
+
+read_registry() {
+  local file sessionId pid startTicks name cwd kind actual
+
+  for file in "$REGISTRY_DIR"/*.json; do
+    IFS=$SEP read -r sessionId pid startTicks name cwd kind < <(
+      jq -r 'def clean: tostring | gsub("[\n\t\u001f]"; " ");
+        [.sessionId, .pid, .procStart, .name, .cwd, .kind] | map(. // "" | clean) | join("\u001f")' \
+        "$file" 2>/dev/null
+    ) || continue
+    [[ -n $sessionId && $pid =~ ^[0-9]+$ ]] || continue
+    kill -0 "$pid" 2>/dev/null || continue
+
+    # A pid can be reused once its session is gone, so the start time must match too.
+    if actual=$(process_start "$pid" 2>/dev/null) && [[ -n $startTicks && $startTicks != "$actual" ]]; then
+      continue
+    fi
+
+    seen[$sessionId]=1
+    livePid[$sessionId]=$pid
+    liveName[$sessionId]=$name
+    liveCwd[$sessionId]=$cwd
+    liveKind[$sessionId]=$kind
+  done
+}
+
+read_boards() {
+  local file sessionId line goal doing waiting todo finished updated cwd
+
+  for file in "$BOARD_DIR"/*.json; do
+    sessionId=$(basename "$file" .json)
+    # An empty board says no more than no board.
+    line=$(jq -r 'def clean: tostring | gsub("[\n\t\u001f]"; " ");
+      select(.version == 1 and (.items | type) == "array")
+      | select(.goal != "" or (.items | length) > 0)
+      | [(.goal // "" | clean),
+         ([.items[] | select(.state == "doing")] | length),
+         ([.items[] | select(.state == "waiting")] | length),
+         ([.items[] | select(.state == "todo")] | length),
+         ([.items[] | select(.state == "done")] | length),
+         (.updatedAt // 0 | floor),
+         (.cwd // "" | clean)]
+      | map(tostring) | join("\u001f")' "$file" 2>/dev/null) || continue
+    [[ -n $line ]] || continue
+    IFS=$SEP read -r goal doing waiting todo finished updated cwd <<<"$line"
+
+    seen[$sessionId]=1
+    boardGoal[$sessionId]=$goal
+    boardDoing[$sessionId]=$doing
+    boardWaiting[$sessionId]=$waiting
+    boardTodo[$sessionId]=$todo
+    boardDone[$sessionId]=$finished
+    boardUpdated[$sessionId]=$updated
+    boardCwd[$sessionId]=$cwd
+  done
+}
+
+# The first top-level value of a key in a transcript. Only whole lines that carry
+# it are parsed, and the scan stops at the first one.
+first_value() {
+  { grep -m 20 -F "\"$1\":\"" "$2" || true; } |
+    jq -r --arg key "$1" '.[$key] // empty | tostring' 2>/dev/null | head -n 1 || true
+}
+
+# The newest title Claude Code gave the conversation.
+last_title() {
+  { tac "$1" | grep -m 1 -F '"type":"ai-title"' || true; } |
+    jq -r '.aiTitle // empty | tostring | gsub("[\n\t\u001f]"; " ")' 2>/dev/null || true
+}
+
+read_transcripts() {
+  local file sessionId mtime cutoff
+  cutoff=$(($(date +%s) - recentDays * 86400))
+
+  for file in "$PROJECT_DIR"/*/*.jsonl; do
+    sessionId=$(basename "$file" .jsonl)
+    mtime=$(stat -c %Y "$file") || continue
+
+    # A session with a board or a process always gets its folder and title;
+    # any other only while its conversation is recent.
+    if [[ -z ${seen[$sessionId]:-} ]] && ((showAll == 0 && mtime < cutoff)); then
+      continue
+    fi
+
+    seen[$sessionId]=1
+    chatMtime[$sessionId]=$((mtime * 1000))
+    chatCwd[$sessionId]=$(first_value cwd "$file")
+    chatEntry[$sessionId]=$(first_value entrypoint "$file")
+    chatTitle[$sessionId]=$(last_title "$file")
+  done
+}
+
+format_age() {
+  local minutes=$(($1 / 60000))
+
+  if ((minutes < 1)); then
+    printf '방금\n'
+  elif ((minutes < 60)); then
+    printf '%s분 전\n' "$minutes"
+  elif ((minutes < 1440)); then
+    printf '%s시간 전\n' "$((minutes / 60))"
+  else
+    printf '%s일 전\n' "$((minutes / 1440))"
+  fi
+}
+
+clip() {
+  local text=$1 limit=$2
+
+  if ((${#text} > limit)); then
+    printf '%s..\n' "${text:0:limit}"
+  else
+    printf '%s\n' "$text"
+  fi
+}
+
+display_path() {
+  local path=$1
+
+  if [[ $path == "$HOME" ]]; then
+    printf '~\n'
+  elif [[ $path == "$HOME"/* ]]; then
+    # shellcheck disable=SC2088 # a literal tilde, for people to read
+    printf '~/%s\n' "${path#"$HOME"/}"
+  else
+    printf '%s\n' "$path"
+  fi
+}
+
+# A command to paste into a shell: the home part stays readable, the rest quoted.
+resume_command() {
+  local cwd=$1 sessionId=$2 place
+
+  # shellcheck disable=SC2088 # a literal tilde: the pasting shell expands it
+  if [[ $cwd == "$HOME" ]]; then
+    place='~'
+  elif [[ $cwd == "$HOME"/* ]]; then
+    # shellcheck disable=SC2088
+    place="~/$(printf '%q' "${cwd#"$HOME"/}")"
+  else
+    place=$(printf '%q' "$cwd")
+  fi
+
+  printf 'cd %s && claude --resume %s\n' "$place" "$sessionId"
+}
+
+# print_section <title> <what it means> <activity SEP label SEP resume>...
+# Newest first, each entry with its resume command under it.
+print_section() {
+  local title=$1 meaning=$2 label resume
+  shift 2
+
+  if (($# == 0)); then
+    printf '%s 없음 (%s)\n' "$title" "$meaning"
+    return 0
+  fi
+
+  printf '%s %s개 (%s)\n' "$title" "$#" "$meaning"
+  printf '%s\n' "$@" | sort -t "$SEP" -k1,1nr | cut -d "$SEP" -f2- |
+    while IFS=$SEP read -r label resume; do
+      printf '  %s\n    %s\n' "$label" "$resume"
+    done
+}
+
+main() {
+  parse_args "$@"
+  command -v jq >/dev/null || die "jq is needed"
+
+  read_registry
+  read_boards
+  read_transcripts
+
+  local nowMs sessionId hasBoard isLive open cwd name goal updated activity flags resume age
+  local hiddenDone=0 hiddenHeadless=0
+  local -a rows=() candidates=() unknown=()
+  nowMs=$(date +%s%3N)
+
+  for sessionId in "${!seen[@]}"; do
+    hasBoard=0 isLive=0 open=0
+    [[ -n ${boardUpdated[$sessionId]:-} ]] && hasBoard=1
+    [[ -n ${livePid[$sessionId]:-} ]] && isLive=1
+
+    if ((hasBoard)); then
+      open=$((boardDoing[$sessionId] + boardWaiting[$sessionId] + boardTodo[$sessionId]))
+    fi
+
+    # `claude -p` and SDK runs carry no board and are nobody's to resume.
+    if ((showAll == 0 && !hasBoard)); then
+      if [[ (-n ${liveKind[$sessionId]:-} && ${liveKind[$sessionId]} != interactive) ||
+        (-n ${chatEntry[$sessionId]:-} && ${chatEntry[$sessionId]} != cli) ]]; then
+        hiddenHeadless=$((hiddenHeadless + 1))
+        continue
+      fi
+    fi
+
+    if ((showAll == 0 && hasBoard && open == 0 && !isLive)); then
+      hiddenDone=$((hiddenDone + 1))
+      continue
+    fi
+
+    cwd=${boardCwd[$sessionId]:-}
+    [[ -n $cwd ]] || cwd=${liveCwd[$sessionId]:-}
+    [[ -n $cwd ]] || cwd=${chatCwd[$sessionId]:-}
+
+    name=${liveName[$sessionId]:-}
+    [[ -n $name ]] || name=${chatTitle[$sessionId]:-}
+    [[ -n $name ]] || name=${sessionId:0:8}
+
+    flags=()
+    if ((hasBoard)); then
+      goal=${boardGoal[$sessionId]:-}
+      [[ -n $goal ]] || goal='목표 미정'
+      updated=${boardUpdated[$sessionId]}
+      age=$(format_age $((nowMs - updated)))
+      ((open > 0 && !isLive)) && flags+=('다시 켤 후보')
+      ((open > 0 && nowMs - updated > staleHours * 3600000)) && flags+=('낡음')
+      ((open == 0)) && flags+=('끝남')
+    else
+      goal='-'
+      updated=0
+      age='-'
+      flags+=('보드 없음')
+      [[ -n ${chatMtime[$sessionId]:-} ]] && age="대화 $(format_age $((nowMs - chatMtime[$sessionId])))"
+    fi
+
+    activity=$updated
+    ((${chatMtime[$sessionId]:-0} > activity)) && activity=${chatMtime[$sessionId]}
+
+    if [[ -n $cwd ]]; then
+      resume=$(resume_command "$cwd" "$sessionId")
+    else
+      resume='-'
+      flags+=('폴더 모름')
+    fi
+
+    local flagText=-
+    ((${#flags[@]} > 0)) && flagText=$(IFS=,; printf '%s' "${flags[*]}")
+
+    if [[ $outputFormat == tsv ]]; then
+      rows+=("$activity"$'\t'"$(printf '%s\t' "$sessionId" "${liveName[$sessionId]:-}" "${chatTitle[$sessionId]:-}" \
+        "$cwd" "${boardGoal[$sessionId]:-}" "${boardDoing[$sessionId]:-}" "${boardWaiting[$sessionId]:-}" \
+        "${boardTodo[$sessionId]:-}" "${boardDone[$sessionId]:-}" "$updated" "${chatMtime[$sessionId]:-}" \
+        "${livePid[$sessionId]:-}" "$flagText")$resume")
+      continue
+    fi
+
+    rows+=("$activity$SEP$(clip "$name" "$NAME_CHARS")$SEP$(display_path "${cwd:-?}")$SEP$(clip "$goal" "$GOAL_CHARS")$SEP${boardDoing[$sessionId]:--}$SEP${boardWaiting[$sessionId]:--}$SEP${boardTodo[$sessionId]:--}$SEP${boardDone[$sessionId]:--}$SEP$age$SEP${livePid[$sessionId]:--}$SEP$flagText")
+
+    if ((hasBoard && open > 0 && !isLive)); then
+      candidates+=("$activity$SEP$(clip "$name" "$NAME_CHARS"): $goal$SEP$resume")
+    elif ((!hasBoard && !isLive)) && [[ $resume != - ]]; then
+      unknown+=("$activity$SEP$(clip "$name" "$NAME_CHARS")$SEP$resume")
+    fi
+  done
+
+  if [[ $outputFormat == tsv ]]; then
+    printf 'id\tname\ttitle\tcwd\tgoal\tdoing\twaiting\ttodo\tdone\tboardUpdatedMs\tchatMtimeMs\tpid\tflags\tresume\n'
+    ((${#rows[@]} == 0)) || printf '%s\n' "${rows[@]}" | sort -t $'\t' -k1,1nr | cut -f2-
+    return 0
+  fi
+
+  if ((${#rows[@]} == 0)); then
+    printf '보여 줄 세션이 없습니다.\n'
+  else
+    {
+      printf '이름%s폴더%s목표%s진행%s기다림%s남음%s완료%s갱신%s프로세스%s상태\n' \
+        "$SEP" "$SEP" "$SEP" "$SEP" "$SEP" "$SEP" "$SEP" "$SEP" "$SEP"
+      printf '%s\n' "${rows[@]}" | sort -t "$SEP" -k1,1nr | cut -d "$SEP" -f2-
+    } | column -t -s "$SEP"
+  fi
+
+  printf '\n'
+  print_section '다시 켤 후보' '일이 남았는데 돌고 있지 않은 세션' "${candidates[@]}"
+
+  if ((${#unknown[@]} > 0)); then
+    printf '\n'
+    print_section '보드 없이 멈춘 세션' '남은 일이 있는지는 모름' "${unknown[@]}"
+  fi
+
+  local notes=()
+  ((hiddenDone == 0)) || notes+=("끝난 보드 ${hiddenDone}개")
+  ((hiddenHeadless == 0)) || notes+=("비대화형 실행 ${hiddenHeadless}개")
+
+  printf '\n'
+
+  if ((${#notes[@]} > 0)); then
+    printf '숨김: %s. --all 로 모두 봅니다.\n' "$(IFS=,; printf '%s' "${notes[*]}" | sed 's/,/, /g')"
+  fi
+
+  printf '보드 없는 세션은 대화가 %s일 안에 바뀐 것만 보입니다. 보드는 %s시간 넘게 갱신되지 않으면 낡음입니다.\n' \
+    "$recentDays" "$staleHours"
+}
+
+main "$@"

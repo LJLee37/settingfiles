@@ -1,0 +1,102 @@
+# CLAUDE.md - LJGaming (게이밍 데스크탑)
+
+> 이 파일(`~/.claude/CLAUDE.md`)은 settingfiles 의 `ljgaming/install.sh` 가 `ljgaming/CLAUDE.md` 에서 깝니다(2026-11-17).
+> 직접 고치면 다음 실행 때 "다름"으로 나오니, 고칠 것이 있으면 사용자에게 말씀드리고 컨트롤 노드에서 settingfiles 를
+> 고칩니다.
+
+## 이 기기
+
+- **LJGaming**: i5-14400F(내장 그래픽 없음), RTX 2080. Windows 와 듀얼 부팅하는 Arch 입니다.
+  - Samsung NVMe 의 p1~p4 는 Windows 입니다(ESP, MSR, C:, 복구).
+  - p5 는 Arch 로, btrfs `ljgaming-root` 에 서브볼륨 `@ @home @snapshots @var_log @pkg` 가 있습니다.
+- **부팅**: GRUB(`EFI/Arch`)과 os-prober 를 씁니다. Windows ESP 를 `/efi` 에 같이 마운트하고, `/boot` 는 btrfs 루트 안에
+  있습니다. Secure Boot 는 꺼져 있습니다.
+- **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음), GNOME(gdm, Wayland).
+- **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
+  (install0~2)는 쓰지 않았고 `set.sh` 만 돌렸습니다. 기록은 `~/waydroid-setup-log.md` 와 `~/install-logs/` 에 있습니다.
+- **server-automation 이 관리하지 않습니다**(사용자 결정 2026-11-17).
+  - sshd 는 꺼 두고, nftables 가 들어오는 연결을 막습니다.
+  - 포트를 열거나 sshd 를 켜는 것은 사용자 승인을 받은 뒤에만 합니다. 지금 여는 것은 사설, 링크 로컬 출발지의 mDNS 와
+    Steam 포트뿐입니다.
+
+## 할 일과 문서
+
+사용자에게는 한국어 존댓말로 답합니다. 문서와 실제가 다르면 추측하지 말고 묻습니다.
+
+- `~/docs/handoff-ljinst-to-desktop.md`: USB 에서 넘어올 때의 상태와 다음 할 일입니다.
+- `~/docs/dualboot-waydroid-plan.md`: 3단계(WayDroid)가 남았습니다.
+- `~/docs/gaming-daily-setup.md`: Steam, 일상 패키지.
+- `~/docs/airplay-receiver-setup.md`: AirPlay 수신기. 목표는 사용자가 "24bit/48kHz 또는 96kHz 비트퍼펙트"로 바꿨습니다.
+- 한 일은 `~/waydroid-setup-log.md` 에 이어 적습니다(실행한 명령, 판, 결과, 실패와 조치).
+
+## root 권한
+
+- 이 Claude Code 에서는 `! sudo` 로 비밀번호를 넣을 수 없습니다.
+- root 가 필요한 일은 명령과 목적, 영향을 먼저 보여 승인받습니다. 승인받으면 스크립트 파일로 묶어
+  `pkexec /usr/bin/bash <스크립트>` 로 실행합니다. 비밀번호는 사용자가 GNOME 비밀번호 창에 넣습니다(2026-11-17).
+- 파티션, 포맷, 부트로더, 펌웨어 부트 항목은 명령 하나씩 승인받습니다. Windows 파티션과 ESP 의 `EFI/Microsoft` 는
+  건드리지 않습니다.
+- `grub-mkconfig` 는 `LC_ALL=C` 로 돌립니다. 한국어 로케일에서는 번역문의 서식(`%1$s`) 때문에 실패하고, grub.cfg 는
+  그대로 남습니다.
+
+## 패키지
+
+- 그룹째 깔지 않고 쓰는 것만 이름으로 깝니다. 기준은 settingfiles 의 `profiles/*.txt` 입니다. 설치 때 `gnome` 그룹을
+  통째로 깔았다가 원치 않는 앱이 들어와 정리한 적이 있습니다.
+- 터미널은 Ghostty 하나만 씁니다. 편집기는 nvim 이고, `vim` 은 nvim 을 가리키는 링크입니다.
+- AUR 헬퍼(yay, paru)는 쓰지 않습니다. `git clone https://aur.archlinux.org/<이름>.git ~/aur/<이름>` 를 한 뒤 PKGBUILD 를
+  보여 드리고, 승인을 받으면 `makepkg -si` 를 돌립니다.
+- snapper 와 snap-pac 이 pacman 전후에 스냅샷을 남깁니다. 되돌릴 때는 `snapper list` 를 봅니다. 루트를 되돌리는 것은
+  LJINST USB 로 부팅해 ArchWiki 「Snapper」 의 서브볼륨 교체 절차로 합니다.
+
+## settingfiles(닷파일)
+
+- `~/gitRepos/settingfiles` 는 공개 저장소의 `arch` 브랜치 사본입니다. 이 기기에는 GitHub 로그인이 없어 push 하지 않습니다.
+- 닷파일(`.zshrc`, `init.vim`, Ghostty, herdr, tmux)은 이 저장소를 가리키는 링크입니다. 여기서 고치지 않습니다. 바꿀 것은
+  사용자에게 말씀드리고, 컨트롤 노드에서 고친 뒤 이 기기는 `git pull` 하고 필요하면 `zsh set.sh` 를 다시 돌립니다.
+- `set.sh` 는 패키지를 깔지 않습니다. 필요한 명령(git, curl, nvim, tmux, pnpm, fastfetch)이 base 프로필에 있습니다.
+- 이 파일과 Claude Code mod 는 `ljgaming/install.sh` 가 깝니다. `git pull` 뒤에 다시 돌리면 이 파일이 새 판이 됩니다.
+  mod 는 저장소의 `claude-mods/` 폴더에서 바로 읽으므로 pull 만으로 새 세션부터 새 판입니다.
+- GitHub 는 로그인 없이 받을 수 있는 공개 저장소만 클론합니다. 비공개 저장소의 내용이 필요해 보이면 멈추고 사용자에게
+  말씀드립니다.
+
+## 세션 보드
+
+`session-board` mod 가 세션의 목표, 진행중, 기다림, 남음, 완료를 대화 옆 pane 에 보여 줍니다. pane 이 화면에
+없으면 프롬프트 위 한 줄로 보여 줍니다. 내용은 Claude 가 `mcp__session-board__update` 로 적습니다. `usage-meter` mod 는
+프롬프트 아래 상태줄에 사용량을 띄웁니다. 두 mod 는 컨트롤 노드와 같은 것입니다.
+
+- 사소하지 않은 작업은 시작할 때 목표와 완료 기준을 적고, 계획이 승인되면 항목으로 풉니다.
+- 항목 상태가 바뀌면 바로 갱신합니다. 완료에는 근거(명령 결과, 로그, 경로)를 붙입니다.
+- 기다리는 항목에는 누구를 기다리는지(사용자, 다른 세션) 적습니다.
+- 목표가 바뀌면 덮어쓰지 않고 새 목표(`startNewGoal`)로 올립니다.
+- 보드는 세션 동안의 현황판입니다. 세션 뒤에도 남길 것은 원래 자리(`~/waydroid-setup-log.md`, `~/docs`)에 따로 적습니다.
+- 이 도구가 없는 세션(비대화형 실행, mod 가 설치되지 않은 때)에서는 이 절을 건너뜁니다.
+- 터미널이 144칸보다 좁으면 pane 이 저절로 열리지 않습니다. 사용자에게 `/board` 를 한 번 입력하면 열린다고
+  알립니다.
+
+## 알게 된 것은 컨트롤 노드의 llm-wiki 로 보냅니다
+
+사용자의 개인 위키(llm-wiki, 비공개)는 이 기기에 없습니다. 조사 결과, 사건의 원인과 해결, 결정의 근거처럼 남길 만한
+것이 생기면 후보(자료, 한 줄 이유)로 사용자에게 말씀드립니다. 넣는 일은 컨트롤 노드에서 합니다.
+
+## Arch 위키는 오프라인 사본을 먼저 봅니다
+
+wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하곤 하므로, 이 기기의 사본(`arch-wiki-docs`, `arch-wiki-lite`)을
+먼저 봅니다.
+
+- 찾기: `wiki_width=100 wiki-search <낱말>`. `wiki_width` 를 주면 dialog 메뉴 없이 목록만 찍습니다. 한국어 문서는
+  `wiki_lang=ko` 를 함께 줍니다.
+- 읽기: 바로 앞 검색의 번호로 `wiki-search <번호>`, 또는 `w3m -dump /usr/share/doc/arch-wiki/html/en/<제목>.html`
+  (제목의 빈칸은 `_`).
+- 답할 때 사본의 판(`pacman -Q arch-wiki-docs`)을 함께 말합니다. 그 뒤에 바뀌었을 수 있는 내용(패키지 판, 드라이버
+  지원)이 결론을 좌우하면 사용자에게 온라인 위키 확인을 부탁합니다.
+
+## 그 밖에
+
+- **소리**: FX-AUDIO-D802C(USB DAC)는 24bit/96kHz 로 고정입니다. 다른 장치는 각자 최대 레이트를 씁니다. 바꿀 때는
+  `audio-rate`(GNOME 앱 "오디오 샘플레이트")를 씁니다. 규칙은 `~/.config/wireplumber/wireplumber.conf.d/60-audio-rate.conf`
+  에 있습니다.
+- **herdr**: `~/.local/bin/herdr` 에 있고 Claude 통합이 깔려 있습니다. 설정은 settingfiles 의 `herdr-config` 링크입니다.
+- **네트워크**: iPhone, iPad, 컨트롤 노드가 이 기기와 같은 서브넷에 있습니다(사용자 2026-11-17).
+- **비밀값**: Wi-Fi 비밀번호와 로그인 정보는 출력하거나 문서에 적지 않습니다.

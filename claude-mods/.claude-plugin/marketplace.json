@@ -1,0 +1,17 @@
+{
+  "name": "local-mods",
+  "owner": { "name": "ljlee" },
+  "description": "Claude Code mods that roles/agentic_coding deploys to the agentic_coding nodes",
+  "plugins": [
+    {
+      "name": "usage-meter",
+      "source": "./usage-meter",
+      "description": "Pins the 5-hour, weekly and extra-credit usage of the account under the prompt"
+    },
+    {
+      "name": "session-board",
+      "source": "./session-board",
+      "description": "Keeps this session's goal, doing, waiting, remaining and done items beside the conversation"
+    }
+  ]
+}

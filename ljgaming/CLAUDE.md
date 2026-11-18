@@ -41,8 +41,14 @@
 
 - 이 Claude Code 에서는 `! sudo` 로 비밀번호를 넣을 수 없습니다.
 - root 가 필요한 일은 명령과 목적, 영향을 먼저 보여 승인받습니다. 승인받으면 스크립트 파일로 묶어
-  `pkexec /usr/bin/bash <스크립트>` 로 실행합니다. 비밀번호는 사용자가 데스크톱의 비밀번호 창(polkit)에 넣습니다
-  (2026-11-17).
+  `pkexec /usr/bin/bash <스크립트>` 로 실행합니다. 사용자가 데스크톱의 비밀번호 창(polkit)에 로그인 비밀번호를 넣고,
+  이어서 FIDO2 토큰(A 나 B)을 터치해야 합니다(2026-11-17, 토큰은 2026-11-18 부터).
+- **pkexec 를 돌리기 전에 사용자에게 토큰을 꽂아 달라고 말합니다.** 토큰이 없으면 비밀번호가 맞아도 실패하고, 화면에는
+  비밀번호가 틀린 것처럼 보입니다.
+- sudo 와 polkit 은 `/etc/pam.d/sudo` 와 `/etc/pam.d/polkit-1` 에서 비밀번호(system-auth) 다음에 pam_u2f 를
+  요구합니다(`/etc/u2f_mappings`, root 소유, origin 과 appid `pam://LJGaming`). 등록 정보를 사용자 홈
+  (`~/.config/Yubico`)에 두지 않는 것은 약한 로그인 비밀번호만으로 바꿔칠 수 있기 때문입니다. 로그인 화면(GDM), su,
+  콘솔 로그인은 그대로이고, root 비밀번호가 비상구입니다.
 - 파티션, 포맷, 부트로더, 펌웨어 부트 항목은 명령 하나씩 승인받습니다. Windows 파티션과 ESP 의 `EFI/Microsoft` 는
   건드리지 않습니다.
 - `grub-mkconfig` 는 `LC_ALL=C` 로 돌립니다. 한국어 로케일에서는 번역문의 서식(`%1$s`) 때문에 실패하고, grub.cfg 는
@@ -67,7 +73,8 @@
 - **SSH 에이전트**는 OpenSSH 의 `ssh-agent.socket` 과 ksshaskpass 입니다(`~/.config/environment.d/61-ssh-agent.conf`).
   gcr-ssh-agent 는 FIDO2(sk) 키로 서명하지 못합니다. `~/.ssh/config` 의 main-server 블록이 이 에이전트와 토큰 A, B 의
   sk 키를 씁니다.
-- **herdr** 에 main-server 가 머신으로 등록돼 켜져 있습니다. 약 30초마다 다시 붙으므로 토큰을 꽂아 두면 PIN 을 묻습니다.
+- **herdr** 에 main-server 가 머신으로 등록돼 켜져 있습니다. 연결이 끊기면 약 30초마다 다시 붙으려 하고, 그때 토큰이
+  꽂혀 있으면 PIN 을 묻습니다(연결돼 있는 동안은 묻지 않음). 끄려면 `herdr machine disable <id>` 입니다.
 - **linger**(`loginctl enable-linger ljlee`)로 herdr 서버가 로그아웃 뒤에도 남습니다. 그래서 사용자 관리자와 세션 D-Bus
   도 남습니다. `WantedBy=default.target` 서비스는 다음 로그인 때 다시 뜨지 않고, D-Bus 서비스 파일은 ReloadConfig
   전까지 반영되지 않습니다.

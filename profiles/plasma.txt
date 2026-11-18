@@ -1,0 +1,32 @@
+# KDE Plasma 6. gnome 프로필처럼 그룹째 깔지 않고 쓰는 것만 이름으로 둡니다(2026-11-18, LJGaming 에 깐 목록).
+# GNOME 과 같이 깔아도 됩니다. 로그인 화면은 gdm 을 그대로 쓰고 plasma-login-manager 는 깔기만 합니다.
+plasma-desktop
+plasma-nm               # 네트워크
+plasma-pa               # 소리
+kscreen                 # 화면 배치
+bluedevil               # 블루투스
+xdg-desktop-portal-kde
+kde-gtk-config          # GTK 앱에 KDE 설정을 맞춤
+breeze-gtk
+kdeplasma-addons
+plasma-systemmonitor
+plasma-disks            # S.M.A.R.T. 경고
+plasma-browser-integration
+drkonqi                 # 충돌 보고
+plasma-login-manager    # 깔기만 함(켜지 않음)
+kwallet-pam             # 로그인 때 KWallet 을 엶. PAM 설정은 따로 해야 합니다
+ksshaskpass             # ssh-add 의 비밀번호와 PIN 을 묻는 창
+# 앱
+dolphin                 # 파일
+ark                     # 압축
+gwenview                # 이미지
+okular                  # PDF
+kcalc
+kcharselect
+partitionmanager
+haruna                  # 동영상
+spectacle               # 스크린샷
+tesseract-data-eng      # spectacle 의 글자 인식(tesseract) 언어 데이터
+tesseract-data-kor
+print-manager           # 인쇄(cups 는 print 프로필)
+system-config-printer

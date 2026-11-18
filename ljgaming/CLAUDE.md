@@ -11,29 +11,38 @@
   - p5 는 Arch 로, btrfs `ljgaming-root` 에 서브볼륨 `@ @home @snapshots @var_log @pkg` 가 있습니다.
 - **부팅**: GRUB(`EFI/Arch`)과 os-prober 를 씁니다. Windows ESP 를 `/efi` 에 같이 마운트하고, `/boot` 는 btrfs 루트 안에
   있습니다. Secure Boot 는 꺼져 있습니다.
-- **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음), GNOME(gdm, Wayland).
+- **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음). GNOME 과 Plasma 6 를 같이
+  깔았습니다(둘 다 Wayland). Plasma 는 settingfiles 의 `profiles/plasma.txt` 와 같은 이름 목록입니다(2026-11-18).
+  로그인 화면은 GDM 이고, plasma-login-manager 는 깔기만 했습니다.
 - **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
   (install0~2)는 쓰지 않았고 `set.sh` 만 돌렸습니다. 기록은 `~/waydroid-setup-log.md` 와 `~/install-logs/` 에 있습니다.
 - **server-automation 이 관리하지 않습니다**(사용자 결정 2026-11-17).
   - sshd 는 꺼 두고, nftables 가 들어오는 연결을 막습니다.
-  - 포트를 열거나 sshd 를 켜는 것은 사용자 승인을 받은 뒤에만 합니다. 지금 여는 것은 사설, 링크 로컬 출발지의 mDNS 와
-    Steam 포트뿐입니다.
+  - 포트를 열거나 sshd 를 켜는 것은 사용자 승인을 받은 뒤에만 합니다. 지금 여는 것은 모두 LAN(사설, 링크 로컬)
+    출발지에만 엽니다.
+    - mDNS(UDP 5353)와 Steam 포트
+    - AirPlay 2: TCP 7000, UDP 319 와 320, TCP 와 UDP 32768-60999. shairport-sync 가 AirPlay 2 소켓을 임의
+      포트에 열기 때문입니다(2026-11-18).
 
 ## 할 일과 문서
 
 사용자에게는 한국어 존댓말로 답합니다. 문서와 실제가 다르면 추측하지 말고 묻습니다.
 
 - `~/docs/handoff-ljinst-to-desktop.md`: USB 에서 넘어올 때의 상태와 다음 할 일입니다.
-- `~/docs/dualboot-waydroid-plan.md`: 3단계(WayDroid)가 남았습니다.
+- `~/docs/dualboot-waydroid-plan.md`: 3단계(WayDroid)가 남았습니다. Plasma 에서 `--mode venus` 로 합니다(사용자 결정).
+  waydroid-nvidia v0.2.0 은 기본 모드에서 드라이버 620.70.06 을 거부하고(#41), GNOME 에서는 hwcomposer 가 죽습니다(#21).
 - `~/docs/gaming-daily-setup.md`: Steam, 일상 패키지.
 - `~/docs/airplay-receiver-setup.md`: AirPlay 수신기. 목표는 사용자가 "24bit/48kHz 또는 96kHz 비트퍼펙트"로 바꿨습니다.
+  지금은 AirPlay 2 수신기 "LJGaming" 하나만 둡니다(사용자 결정). 클래식 AirPlay 설정은 꺼진 채 남아 있습니다.
+- `~/docs/ljgaming-trial-and-error.md`: 이 기기에서 겪은 시행착오(증상, 원인, 해결).
 - 한 일은 `~/waydroid-setup-log.md` 에 이어 적습니다(실행한 명령, 판, 결과, 실패와 조치).
 
 ## root 권한
 
 - 이 Claude Code 에서는 `! sudo` 로 비밀번호를 넣을 수 없습니다.
 - root 가 필요한 일은 명령과 목적, 영향을 먼저 보여 승인받습니다. 승인받으면 스크립트 파일로 묶어
-  `pkexec /usr/bin/bash <스크립트>` 로 실행합니다. 비밀번호는 사용자가 GNOME 비밀번호 창에 넣습니다(2026-11-17).
+  `pkexec /usr/bin/bash <스크립트>` 로 실행합니다. 비밀번호는 사용자가 데스크톱의 비밀번호 창(polkit)에 넣습니다
+  (2026-11-17).
 - 파티션, 포맷, 부트로더, 펌웨어 부트 항목은 명령 하나씩 승인받습니다. Windows 파티션과 ESP 의 `EFI/Microsoft` 는
   건드리지 않습니다.
 - `grub-mkconfig` 는 `LC_ALL=C` 로 돌립니다. 한국어 로케일에서는 번역문의 서식(`%1$s`) 때문에 실패하고, grub.cfg 는
@@ -43,11 +52,27 @@
 
 - 그룹째 깔지 않고 쓰는 것만 이름으로 깝니다. 기준은 settingfiles 의 `profiles/*.txt` 입니다. 설치 때 `gnome` 그룹을
   통째로 깔았다가 원치 않는 앱이 들어와 정리한 적이 있습니다.
-- 터미널은 Ghostty 하나만 씁니다. 편집기는 nvim 이고, `vim` 은 nvim 을 가리키는 링크입니다.
+- 터미널은 Ghostty 하나만 씁니다. 편집기는 nvim 이고, `vim` 은 nvim 을 가리키는 링크입니다. gnome-text-editor 는
+  지웠습니다(nvim 으로 충분, 사용자 2026-11-17).
 - AUR 헬퍼(yay, paru)는 쓰지 않습니다. `git clone https://aur.archlinux.org/<이름>.git ~/aur/<이름>` 를 한 뒤 PKGBUILD 를
   보여 드리고, 승인을 받으면 `makepkg -si` 를 돌립니다.
 - snapper 와 snap-pac 이 pacman 전후에 스냅샷을 남깁니다. 되돌릴 때는 `snapper list` 를 봅니다. 루트를 되돌리는 것은
   LJINST USB 로 부팅해 ArchWiki 「Snapper」 의 서브볼륨 교체 절차로 합니다.
+
+## 로그인, 비밀 저장소, SSH (2026-11-18)
+
+- **비밀 저장소는 KWallet** 입니다. gnome-keyring 패키지는 남기고 사용자 유닛을 mask 했습니다. `/etc/pam.d/gdm-password`
+  와 `/etc/pam.d/plasmalogin` 을 덮어써 pam_gnome_keyring 을 빼고, gdm-password 에 pam_kwallet5 를 넣었습니다. 지갑은
+  로그인 비밀번호로 저절로 열립니다.
+- **SSH 에이전트**는 OpenSSH 의 `ssh-agent.socket` 과 ksshaskpass 입니다(`~/.config/environment.d/61-ssh-agent.conf`).
+  gcr-ssh-agent 는 FIDO2(sk) 키로 서명하지 못합니다. `~/.ssh/config` 의 main-server 블록이 이 에이전트와 토큰 A, B 의
+  sk 키를 씁니다.
+- **herdr** 에 main-server 가 머신으로 등록돼 켜져 있습니다. 약 30초마다 다시 붙으므로 토큰을 꽂아 두면 PIN 을 묻습니다.
+- **linger**(`loginctl enable-linger ljlee`)로 herdr 서버가 로그아웃 뒤에도 남습니다. 그래서 사용자 관리자와 세션 D-Bus
+  도 남습니다. `WantedBy=default.target` 서비스는 다음 로그인 때 다시 뜨지 않고, D-Bus 서비스 파일은 ReloadConfig
+  전까지 반영되지 않습니다.
+- **한글 입력**: `~/.config/environment.d/60-ibus-xim.conf` 의 `XMODIFIERS=@im=ibus` 와, Steam 에만 둔
+  `GTK_IM_MODULE=ibus`(데스크톱 파일 사본)입니다. Plasma Wayland 에서 XWayland 앱(Steam)의 한글 입력 때문입니다.
 
 ## settingfiles(닷파일)
 
@@ -95,8 +120,10 @@ wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하곤 하므
 ## 그 밖에
 
 - **소리**: FX-AUDIO-D802C(USB DAC)는 24bit/96kHz 로 고정입니다. 다른 장치는 각자 최대 레이트를 씁니다. 바꿀 때는
-  `audio-rate`(GNOME 앱 "오디오 샘플레이트")를 씁니다. 규칙은 `~/.config/wireplumber/wireplumber.conf.d/60-audio-rate.conf`
+  `audio-rate`(앱 "오디오 샘플레이트")를 씁니다. 규칙은 `~/.config/wireplumber/wireplumber.conf.d/60-audio-rate.conf`
   에 있습니다.
+  절전 복귀 뒤 D802C 가 백색소음을 내서, `/etc/systemd/system/ljlee-pipewire-resume.service` 가 복귀 2초 뒤 사용자
+  PipeWire 를 다시 시작합니다.
 - **herdr**: `~/.local/bin/herdr` 에 있고 Claude 통합이 깔려 있습니다. 설정은 settingfiles 의 `herdr-config` 링크입니다.
 - **네트워크**: iPhone, iPad, 컨트롤 노드가 이 기기와 같은 서브넷에 있습니다(사용자 2026-11-17).
 - **비밀값**: Wi-Fi 비밀번호와 로그인 정보는 출력하거나 문서에 적지 않습니다.

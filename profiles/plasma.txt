@@ -1,5 +1,6 @@
 # KDE Plasma 6. gnome 프로필처럼 그룹째 깔지 않고 쓰는 것만 이름으로 둡니다(2026-11-18, LJGaming 에 깐 목록).
 # GNOME 과 같이 깔아도 됩니다. 로그인 화면은 gdm 을 그대로 쓰고 plasma-login-manager 는 깔기만 합니다.
+# desktop 프로필과 같이 깝니다(터미널 Ghostty, 한글 입력, 글꼴, 소리, 블루투스). Konsole 은 일부러 뺌(desktop.sh 가 Ghostty 로 정함).
 plasma-desktop
 plasma-nm               # 네트워크
 plasma-pa               # 소리
@@ -15,7 +16,6 @@ plasma-browser-integration
 drkonqi                 # 충돌 보고
 plasma-login-manager    # 깔기만 함(켜지 않음)
 kwallet-pam             # 로그인 때 KWallet 을 엶. PAM 설정은 따로 해야 합니다
-ksshaskpass             # ssh-add 의 비밀번호와 PIN 을 묻는 창
 # 앱
 dolphin                 # 파일
 ark                     # 압축
@@ -30,3 +30,30 @@ tesseract-data-eng      # spectacle 의 글자 인식(tesseract) 언어 데이�
 tesseract-data-kor
 print-manager           # 인쇄(cups 는 print 프로필)
 system-config-printer
+ffmpegthumbs            # Dolphin 동영상 썸네일
+kdegraphics-thumbnailers  # PDF, PS, RAW 썸네일
+tela-circle-icon-theme-purple  # 아이콘 Tela-circle-purple-dark(사용자 선택 2026-11-18)
+# gnome 프로필 앱의 KDE 대응(2026-11-18). collision, warp, gnome-boxes 는 대응이 없어 gnome 에만 있음
+skanlite                # 스캔(simple-scan). 스캐너 드라이버는 print 프로필
+krdc                    # 원격 데스크톱 RDP, VNC(gnome-connections)
+isoimagewriter          # ISO 를 USB 에 굽기(impression)
+kwalletmanager          # 비밀 저장소 KWallet 보기(seahorse)
+# 게임(2026-11-18 사용자 선택). gnome 프로필 게임의 대응 12개와 KDE 에만 있는 5개
+klines                  # five-or-more
+kfourinline             # four-in-a-row
+knights                 # gnome-chess
+gnuchess                # knights 에서 컴퓨터와 두기(stockfish 는 공식 저장소에 없음)
+kmahjongg               # gnome-mahjongg
+kmines                  # gnome-mines
+ksnakeduel              # gnome-nibbles
+killbots                # gnome-robots
+ksudoku                 # gnome-sudoku
+kreversi                # iagno
+kblocks                 # quadrapassel
+klickety                # swell-foop
+kiriki                  # tali
+kpat                    # 카드 솔리테어 모음
+kigo                    # 바둑
+bovo                    # 오목
+kapman                  # 팩맨류
+kbreakout               # 벽돌깨기

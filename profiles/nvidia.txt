@@ -3,3 +3,5 @@
 nvidia-open
 nvidia-utils
 lib32-nvidia-utils      # Steam(32비트)용. multilib 가 필요해 nvidia.sh 가 먼저 켭니다
+nvidia-settings
+nvtop                   # GPU 사용량(htop 의 GPU 미터는 DRM fdinfo 를 읽어 NVIDIA 에서는 늘 0)

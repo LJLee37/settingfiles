@@ -1,4 +1,5 @@
 # GNOME. archinstall 처럼 그룹째 깔지 않고 쓰는 것만 이름으로 둡니다(gnome-software 등은 일부러 뺌).
+# desktop 프로필과 같이 깝니다(터미널, 한글 입력, 글꼴, 소리, 블루투스는 2026-11-18 desktop 으로 옮김).
 gdm
 gnome-shell
 gnome-control-center
@@ -16,9 +17,6 @@ gvfs-gphoto2            # 카메라
 gvfs-nfs
 gvfs-dnssd              # 네트워크 공유 찾기
 gvfs-wsdd
-ghostty                 # OSC 52 를 받는 터미널. ssh 안의 herdr, Claude Code, nvim 복사가 이 기기 클립보드로(ghostty-config)
-xdg-terminal-exec       # 터미널 앱(nvim.desktop 등)을 띄울 터미널을 고름. gnome.sh 가 Ghostty 로 정함
-wl-clipboard            # Wayland 클립보드(wl-copy). GNOME Terminal 이 OSC 52 를 안 받아 tmux 와 herdr 원격 모드가 이걸로 복사
 loupe                   # 이미지
 papers                  # PDF
 seahorse                # 키링 내용 보기
@@ -34,10 +32,12 @@ gnome-system-monitor
 gnome-tweaks
 gnome-backgrounds
 dconf-editor
-# 한글과 글꼴
-ibus-hangul
-noto-fonts-cjk
-noto-fonts-emoji
+gnome-shell-extension-appindicator  # 트레이 아이콘(Steam, Discord)
+showtime                # 동영상
+gst-libav               # showtime 등 GStreamer 앱의 코덱
+gst-plugins-ugly
+gst-plugins-bad
+gst-thumbnailers        # nautilus 동영상 썸네일
 # 다른 컴퓨터를 고칠 때 쓰는 GUI 도구
 impression              # ISO 를 USB 에 굽기
 gnome-connections       # 원격 데스크톱(RDP, VNC) 클라이언트
@@ -49,6 +49,7 @@ five-or-more
 four-in-a-row
 gnome-2048
 gnome-chess
+gnuchess                # gnome-chess 에서 컴퓨터와 두기(stockfish 는 공식 저장소에 없음)
 gnome-klotski
 gnome-mahjongg
 gnome-mines

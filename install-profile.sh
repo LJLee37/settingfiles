@@ -2,7 +2,7 @@
 # 용도별 프로필을 깝니다. 프로필은 profiles/<이름>.txt(패키지, "aur:이름" 은 AUR)와
 # profiles/<이름>.sh(설정, 있을 때만)입니다. 다시 돌리면 빠진 것만 채웁니다.
 #
-#   ./install-profile.sh gnome steam        설치(보통 사용자로: sudo 를 부르고 AUR 까지)
+#   ./install-profile.sh desktop gnome gaming  설치(보통 사용자로: sudo 를 부르고 AUR 까지)
 #   ./install-profile.sh --check gnome      아무것도 바꾸지 않고 빠진 것만 보여 줌
 #   ./install-profile.sh --list             프로필 목록
 #

@@ -1,6 +1,7 @@
 # install1.sh 가 pacstrap 으로 까는 기본. 어느 기기든 같습니다.
 base
 linux
+linux-headers       # 커널 모듈을 직접 빌드해야 할 때(DKMS 등)를 대비해 둠(사용자 결정 2026-11-18)
 linux-firmware
 intel-ucode         # CPU 제조사를 가리지 않게 둘 다(GRUB 이 맞는 것을 씀)
 amd-ucode
@@ -29,6 +30,12 @@ man-pages
 texinfo
 fastfetch           # .zshrc 가 셸을 열 때마다 부름
 htop
+pacman-contrib      # paccache(패키지 캐시 정리), checkupdates, pactree
 nodejs              # nvim 의 coc.nvim. nvm 이 없어도 nvim 이 돌게 둡니다(사용자 결정 2026-11-17)
 pnpm                # nvim 플러그인과 node provider(set.sh 가 pnpm add -g neovim). yarn 대신(2026-11-17)
 python-pynvim       # nvim 의 python provider
+# 오프라인 ArchWiki 와 터미널 리더(2026-11-18 rescue 에서 옮김. 어느 기기든 인터넷이 안 될 때, 사이트가 봇을 막을 때)
+arch-wiki-docs      # /usr/share/doc/arch-wiki/html
+arch-wiki-lite      # wiki-search(터미널), wiki-search-html(xdg-open 으로 브라우저)
+dialog              # wiki-search 의 고르는 메뉴
+w3m                 # 터미널 브라우저. 위키 HTML 을 터미널에서 보고, Claude 는 w3m -dump 로 읽음

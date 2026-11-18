@@ -1,0 +1,3 @@
+# 사무용(2026-11-18 사용자 결정으로 따로 둠)
+libreoffice-fresh
+libreoffice-fresh-ko    # 한국어 화면과 도움말

@@ -12,8 +12,10 @@
 - **부팅**: GRUB(`EFI/Arch`)과 os-prober 를 씁니다. Windows ESP 를 `/efi` 에 같이 마운트하고, `/boot` 는 btrfs 루트 안에
   있습니다. Secure Boot 는 꺼져 있습니다.
 - **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음). GNOME 과 Plasma 6 를 같이
-  깔았습니다(둘 다 Wayland). Plasma 는 settingfiles 의 `profiles/plasma.txt` 와 같은 이름 목록입니다(2026-11-18).
-  로그인 화면은 GDM 이고, plasma-login-manager 는 깔기만 했습니다.
+  깔았습니다(둘 다 Wayland). 로그인 화면은 GDM 이고, plasma-login-manager 는 깔기만 했습니다.
+- **프로필**: settingfiles 의 `base snapshots nvidia desktop plasma gnome gaming apps office` 입니다(2026-11-18). 이 기기는
+  `hosts/*.env` 가 없으니 `./install-profile.sh --check <위 목록>` 으로 빠진 것을 봅니다. 프로필에 없이 손으로 깐 것(os-prober,
+  pam-u2f, shairport-sync 와 nqptp, waydroid-nvidia-bin 과 waydroid-script-git)은 아래 문서에 있습니다.
 - **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
   (install0~2)는 쓰지 않았고 `set.sh` 만 돌렸습니다. 기록은 `~/waydroid-setup-log.md` 와 `~/install-logs/` 에 있습니다.
 - **server-automation 이 관리하지 않습니다**(사용자 결정 2026-11-17).
@@ -23,17 +25,31 @@
     - mDNS(UDP 5353)와 Steam 포트
     - AirPlay 2: TCP 7000, UDP 319 와 320, TCP 와 UDP 32768-60999. shairport-sync 가 AirPlay 2 소켓을 임의
       포트에 열기 때문입니다(2026-11-18).
+    - WayDroid: `waydroid0` 의 DNS 와 DHCP 입력, 그리고 forward(컨테이너에서 나가는 것과 그 응답만)(2026-11-18).
 
 ## 할 일과 문서
 
 사용자에게는 한국어 존댓말로 답합니다. 문서와 실제가 다르면 추측하지 말고 묻습니다.
 
+다시 깔 때의 절차는 settingfiles 의 문서 셋에 있습니다(2026-11-18). 이 기기의 `~/docs/ljgaming-waydroid.md`,
+`~/docs/ljgaming-airplay.md`, `~/docs/pam-u2f-setup.md` 와 같은 내용이고, 바꿀 것은 컨트롤 노드에서 저장소 쪽을 고칩니다.
+
+- `ljgaming/docs/waydroid.md`: WayDroid(원스토어용). waydroid-nvidia-bin 0.2.0 `--mode venus`, GAPPS(LineageOS 20,
+  Android 13), libhoudini, 창 1280x720 고정이고 Plasma 에서만 씁니다(GNOME 에서는 hwcomposer 가 죽음, #21). 소리는 안
+  나고(사용자가 미룸), 재부팅 뒤 컨테이너 자동 시작과 binder 링크는 아직 확인하지 않았습니다.
+- `ljgaming/docs/airplay.md`: AirPlay 2 수신기 "LJGaming" 하나(직접 빌드한 shairport-sync 5.6.3 과 nqptp 1.2.9, 보안
+  갱신은 직접 챙김). 1시간 시험 통과(2026-11-18). 남은 확인은 로그아웃 뒤 다시 로그인했을 때 저절로 돌아오는지, 절전
+  복귀 뒤 D802C 잡음이 없어지는지입니다. AirPlay 2 모드에서는 수신기가 원격 제어(다음 곡 등)를 보낼 수 없어, 곡이
+  저절로 넘어가면 보내는 기기 쪽을 먼저 봅니다.
+- `docs/pam-u2f.md`: sudo 와 polkit 의 토큰 터치(아래 "root 권한"). 토큰을 바꾸거나 되돌리는 법도 있습니다.
+
+이 기기의 `~/docs` 에 있는 것:
+
 - `~/docs/handoff-ljinst-to-desktop.md`: USB 에서 넘어올 때의 상태와 다음 할 일입니다.
-- `~/docs/dualboot-waydroid-plan.md`: 3단계(WayDroid)가 남았습니다. Plasma 에서 `--mode venus` 로 합니다(사용자 결정).
-  waydroid-nvidia v0.2.0 은 기본 모드에서 드라이버 620.70.06 을 거부하고(#41), GNOME 에서는 hwcomposer 가 죽습니다(#21).
+- `~/docs/dualboot-waydroid-plan.md`: 이중 부팅과 WayDroid 계획, 단계별 경과입니다.
 - `~/docs/gaming-daily-setup.md`: Steam, 일상 패키지.
-- `~/docs/airplay-receiver-setup.md`: AirPlay 수신기. 목표는 사용자가 "24bit/48kHz 또는 96kHz 비트퍼펙트"로 바꿨습니다.
-  지금은 AirPlay 2 수신기 "LJGaming" 하나만 둡니다(사용자 결정). 클래식 AirPlay 설정은 꺼진 채 남아 있습니다.
+- `~/docs/airplay-receiver-setup.md`: AirPlay 수신기 조사와 계획. 목표는 사용자가 "24bit/48kHz 또는 96kHz 비트퍼펙트"로
+  바꿨습니다.
 - `~/docs/ljgaming-trial-and-error.md`: 이 기기에서 겪은 시행착오(증상, 원인, 해결).
 - 한 일은 `~/waydroid-setup-log.md` 에 이어 적습니다(실행한 명령, 판, 결과, 실패와 조치).
 
@@ -48,7 +64,8 @@
 - sudo 와 polkit 은 `/etc/pam.d/sudo` 와 `/etc/pam.d/polkit-1` 에서 비밀번호(system-auth) 다음에 pam_u2f 를
   요구합니다(`/etc/u2f_mappings`, root 소유, origin 과 appid `pam://LJGaming`). 등록 정보를 사용자 홈
   (`~/.config/Yubico`)에 두지 않는 것은 약한 로그인 비밀번호만으로 바꿔칠 수 있기 때문입니다. 로그인 화면(GDM), su,
-  콘솔 로그인은 그대로이고, root 비밀번호가 비상구입니다.
+  콘솔 로그인은 그대로이고, root 비밀번호가 비상구입니다. 절차와 토큰 교체, 되돌리기는 settingfiles 의 `docs/pam-u2f.md`
+  입니다.
 - 파티션, 포맷, 부트로더, 펌웨어 부트 항목은 명령 하나씩 승인받습니다. Windows 파티션과 ESP 의 `EFI/Microsoft` 는
   건드리지 않습니다.
 - `grub-mkconfig` 는 `LC_ALL=C` 로 돌립니다. 한국어 로케일에서는 번역문의 서식(`%1$s`) 때문에 실패하고, grub.cfg 는
@@ -78,8 +95,42 @@
 - **linger**(`loginctl enable-linger ljlee`)로 herdr 서버가 로그아웃 뒤에도 남습니다. 그래서 사용자 관리자와 세션 D-Bus
   도 남습니다. `WantedBy=default.target` 서비스는 다음 로그인 때 다시 뜨지 않고, D-Bus 서비스 파일은 ReloadConfig
   전까지 반영되지 않습니다.
-- **한글 입력**: `~/.config/environment.d/60-ibus-xim.conf` 의 `XMODIFIERS=@im=ibus` 와, Steam 에만 둔
-  `GTK_IM_MODULE=ibus`(데스크톱 파일 사본)입니다. Plasma Wayland 에서 XWayland 앱(Steam)의 한글 입력 때문입니다.
+- **한글 입력**: `~/.config/environment.d/60-ibus-xim.conf` 의 `XMODIFIERS=@im=ibus`(plasma 프로필의 `plasma.sh` 가
+  만듦)와, Steam 에만 둔 `GTK_IM_MODULE=ibus`(데스크톱 파일 사본, 이것도 `plasma.sh` 가 만듦)입니다. Plasma Wayland 에서 XWayland 앱(Steam)의
+  한글 입력 때문입니다.
+- **Discord** 는 기본값(네이티브 Wayland)으로 씁니다. 한글 조합 중 Shift+Enter 가 줄바꿈이 아니라 전송이 되는 문제는
+  감수합니다(사용자 결정 2026-11-18). XWayland 로 고정하는 우회(`--ozone-platform=x11` 과 `GTK_IM_MODULE=ibus`)는
+  시험해 보고 되돌렸고, 그 파일은 `~/install-logs/discord-x11-20261118/` 에 있습니다.
+
+## Plasma 화면 (2026-11-18)
+
+테마, 패널, Dolphin 미리보기, 전원과 화면 잠금, 자연 스크롤, 한/영 키, Steam 한글 입력 사본은 plasma 프로필의
+`plasma.sh` 가 맞춥니다(`./install-profile.sh --check plasma` 로 확인). 프로필에 넣지 않은 것은 배경 이미지와 모니터별
+설정(HDR, 밝기, 주사율. `~/.config/kwinoutputconfig.json` 과 `kwinrc` 의 `[Windows_HDR]`)입니다.
+
+- **테마**: Breeze 어두운 테마 위에 색 구성표 "하늘보라 다크"(저장소 `profiles/plasma/SkyVioletDark.colors`, Breeze Dark
+  바탕에 선택, 포커스, 링크는 하늘색, 마우스 올림과 방문 링크는 보라색), 아이콘은 Tela-circle-purple-dark
+  (`tela-circle-icon-theme-purple`)입니다. 바꾸기 전 설정은 `~/install-logs/theme-backup-20261118/` 에 있습니다.
+- **터미널 앱**: Konsole 이 없으므로 `kdeglobals` 의 `[General] TerminalApplication=ghostty` 입니다(desktop 프로필의
+  `desktop.sh` 가 정함). Terminal=true 앱
+  (메뉴의 htop)과 Dolphin 의 "터미널 열기"가 이 값을 쓰고, 없으면 konsole 을 찾다가 실패합니다. `TerminalService` 는
+  비워 둡니다. Ghostty 데스크톱 파일이 `--gtk-single-instance=true` 로 열어 작업 폴더가 넘어가지 않을 수 있습니다.
+- **패널**: 두 화면(LG 2560x1080, Samsung 1920x1080) 모두 하단 패널이고 위젯 구성과 순서가 같습니다(`profiles/plasma/panels.js`).
+  작업 표시줄은 모든 화면의 창을 보여 줍니다. 트레이 설정은 패널마다 따로 저장되며 서로 맞추지 않습니다(사용자 결정).
+- **전원과 잠금**: 전원 연결 때 15분 뒤 화면 어둡게, 30분 뒤 끄기, 자동 절전 안 함. 30분 뒤 화면 잠금(잠그면 바로 비밀번호).
+- **마우스**: 모든 마우스가 자연 스크롤입니다(사용자 2026-11-18, `kcminputrc` 의 `[Libinput][Defaults][Pointer]`). 장치별
+  그룹에 값이 있으면 그것이 우선합니다.
+- **모니터**(프로필에 없음, 다시 깔면 손으로. 2026-11-19 `kscreen-doctor -o` 기준): 화면 0 은 LG(DP-3, 주 모니터, 오른쪽
+  1920,0) 2560x1080 74.99 Hz 에 HDR 과 넓은 색 영역을 켜고 SDR 밝기 250 nits, 최대 밝기를 250 nits 로 덮어씀(EDID 248),
+  DDC 밝기 90% 입니다. 화면 1 은 Samsung(HDMI-A-1, 왼쪽 0,241) 1920x1080 60 Hz, HDR 없음, 밝기 100% 입니다. 둘 다 배율 1,
+  sRGB. HDR 값은 사용자가 직접 맞춘 것이고 `kwinrc` 의 `[Windows_HDR] MaxLuminance=250`, `Reference=250` 과 함께 갑니다.
+- **배경**: 바탕화면과 잠금 화면은 `~/Pictures` 아래 배경 모음 폴더의 파일입니다. 폴더를 옮기거나 이름을 바꾸면 배경이
+  풀립니다. 같은 모음이 NAS 의 `ljlee/10-Media/Photos` 아래에도 있습니다.
+- **Dolphin**: `kdeglobals` 의 `[PreviewSettings] MaximumRemoteSize=52428800` 으로 원격 파일도 50 MiB 까지 미리보기를
+  만듭니다.
+- **키보드**: 오른쪽 Alt 를 한/영 키로 씁니다(`kxkbrc` 의 `[Layout] Options=korean:ralt_hangul`, `ResetOldOptions=true`,
+  `Use=true`, `plasma.sh` 가 정함). 그 전에는 한/영 전환이 KRunner 를 열었습니다. KWin 은 `kwriteconfig6 --notify` 로 값이
+  실제로 바뀔 때만 다시 읽습니다. 값이 같으면 빈 값으로 바꿨다가 되돌립니다.
 
 ## settingfiles(닷파일)
 
@@ -132,5 +183,10 @@ wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하곤 하므
   절전 복귀 뒤 D802C 가 백색소음을 내서, `/etc/systemd/system/ljlee-pipewire-resume.service` 가 복귀 2초 뒤 사용자
   PipeWire 를 다시 시작합니다.
 - **herdr**: `~/.local/bin/herdr` 에 있고 Claude 통합이 깔려 있습니다. 설정은 settingfiles 의 `herdr-config` 링크입니다.
+- **GPU 사용량**은 nvtop(settingfiles 의 nvidia 프로필)이나 nvidia-smi 로 봅니다. htop 의 GPU 미터는 `/proc/*/fdinfo` 의 `drm-engine-*` 를 더하는데
+  NVIDIA 드라이버는 그 키를 내지 않아 늘 0 입니다.
 - **네트워크**: iPhone, iPad, 컨트롤 노드가 이 기기와 같은 서브넷에 있습니다(사용자 2026-11-17).
+- **NAS**: main-server 의 NAS 는 IKEv2 VPN 연결 "main-server VPN"(networkmanager-strongswan, EAP 사용자 ljlee,
+  비밀번호는 저장하지 않음)을 켠 뒤 SMB 로 봅니다. 공유는 public, ljlee, timemachine-ljlee 입니다. 주소는
+  NetworkManager 연결 정보에 있습니다(공개 저장소라 여기 적지 않음).
 - **비밀값**: Wi-Fi 비밀번호와 로그인 정보는 출력하거나 문서에 적지 않습니다.

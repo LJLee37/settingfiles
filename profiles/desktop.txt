@@ -1,0 +1,28 @@
+# 화면이 있는 기기의 공통. GNOME 이든 Plasma 든 같이 깝니다(2026-11-18, gnome 에서 옮기고 LJGaming 에 손으로 깐 것을 더함).
+# 터미널과 편집기
+ghostty                 # OSC 52 를 받는 터미널. ssh 안의 herdr, Claude Code, nvim 복사가 이 기기 클립보드로(ghostty-config)
+xdg-terminal-exec       # GTK 앱이 터미널 앱(nvim.desktop 등)을 띄울 터미널을 고름. desktop.sh 가 Ghostty 로 정함
+wl-clipboard            # Wayland 클립보드(wl-copy). tmux 와 herdr 원격 모드가 이걸로 복사
+xdg-utils               # xdg-open, xdg-mime(desktop.sh 가 기본 편집기를 nvim 으로 정함)
+# 한글과 글꼴
+ibus-hangul             # GNOME 은 자기 설정으로, Plasma 는 plasma.sh 가 IBus Wayland 로 씀
+noto-fonts              # 라틴 글꼴. Steam 의 ttf-font 공급자를 미리 정함
+noto-fonts-cjk
+noto-fonts-emoji
+# 소리. 데스크톱이 "PulseAudio 호환 서버" 같은 공급자만 요구해 --noconfirm 이 고르게 두지 않고 이름으로 둡니다
+pipewire
+pipewire-pulse
+pipewire-alsa
+pipewire-jack           # jack2 가 먼저 깔린 기기는 충돌로 설치가 멈춥니다. 한 번 sudo pacman -S pipewire-jack 으로 바꿈(y)
+wireplumber
+gst-plugin-pipewire     # GStreamer 앱(화면 녹화 등)이 PipeWire 를 씀
+rtkit                   # PipeWire 실시간 우선순위
+alsa-utils              # aplay, amixer(장치 확인)
+# 블루투스(desktop.sh 가 bluetooth.service 를 켬. 꺼져 있으면 설정 화면의 블루투스가 동작하지 않음)
+bluez
+bluez-utils
+# SSH 와 FIDO2 토큰: OpenSSH 자체 에이전트(openssh, base)와 PIN 과 터치 확인 창. desktop.sh 가 에이전트를 켭니다(2026-11-18)
+ksshaskpass             # 터미널이 없을 때(herdr, Dolphin, git GUI) ssh 의 PIN 과 "confirm user presence" 를 묻는 창. GNOME 에서도 씀
+# 오프라인 위키를 그래픽으로 볼 때는 base 의 wiki-search-html 이 기본 웹 브라우저로 엽니다(따로 리더를 두지 않음, 사용자 2026-11-18)
+# 집 NAS: main-server 의 SMB 는 IKEv2 VPN 안에서만 열립니다. 연결은 기기마다 사용자가 만들고 비밀번호는 저장하지 않음(README)
+networkmanager-strongswan

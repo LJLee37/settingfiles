@@ -2,3 +2,4 @@
 firefox
 discord
 aur:claude-desktop
+aur:claude-code         # 제어 노드는 install-control-node.sh 가 깜. 그 밖의 기기(LJGaming)는 여기서

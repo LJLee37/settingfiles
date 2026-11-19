@@ -91,7 +91,9 @@
   gnome-keyring 과 옛 키링 파일(`~/.local/share/keyrings`)은 2026-11-19 GNOME 과 함께 지웠습니다.
 - **SSH 에이전트**는 OpenSSH 의 `ssh-agent.socket` 과 ksshaskpass 입니다(`~/.config/environment.d/61-ssh-agent.conf`).
   gcr-ssh-agent 는 FIDO2(sk) 키로 서명하지 못합니다. `~/.ssh/config` 의 main-server 블록이 이 에이전트와 토큰 A, B 의
-  sk 키를 씁니다.
+  sk 키를 씁니다. 같은 파일의 `SSH_ASKPASS_REQUIRE=prefer` 로 터미널에서 돌려도 토큰 PIN 을 ksshaskpass 창으로 묻습니다
+  (2026-11-19, desktop 프로필. pull 뒤 `./install-profile.sh desktop` 과 다시 로그인부터). 토큰 PIN 은 창의 Remember
+  password 를 켜지 않습니다. 에이전트에 올린 토큰 키도 쓸 때마다 PIN 과 터치를 묻습니다.
 - **herdr** 에 main-server 가 머신으로 등록돼 켜져 있습니다. 연결이 끊기면 약 30초마다 다시 붙으려 하고, 그때 토큰이
   꽂혀 있으면 PIN 을 묻습니다(연결돼 있는 동안은 묻지 않음). 끄려면 `herdr machine disable <id>` 입니다.
 - **linger**(`loginctl enable-linger ljlee`)로 herdr 서버가 로그아웃 뒤에도 남습니다. 그래서 사용자 관리자와 세션 D-Bus

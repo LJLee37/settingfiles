@@ -18,6 +18,8 @@
 # ksshaskpass 를 씁니다. SSH_ASKPASS_REQUIRE=prefer 로 터미널에서 돌려도 토큰 PIN 과 키 암호를 ksshaskpass 창으로 묻습니다
 # (2026-11-19 사용자 결정, ArchWiki 「KDE Wallet」). 토큰 PIN 은 창의 Remember password 를 켜지 않습니다(지갑이 열린 동안 터치만으로
 # 쓰이게 됨). 키 파일 암호(인증서 키 id_ed25519)는 기억시켜도 됩니다.
+# SUDO_ASKPASS 도 같은 창으로 둡니다. 터미널이 없는 곳(Claude Code 의 Bash)에서 sudo -A <명령> 을 부르면 비밀번호를 창으로
+# 묻습니다(2026-11-19 사용자 결정, LJTF 에서 시험). sudo 비밀번호는 Remember password 를 켜지 않습니다(켜면 묻지 않고 root 가 됨).
 # environment.d 는 사용자 관리자가 다시 뜰 때 읽으므로(linger 면 재부팅) 지금 관리자에는 set-environment 로도 넣습니다.
 EDITOR_DESKTOP=nvim.desktop
 TERMINAL_DESKTOP=com.mitchellh.ghostty.desktop
@@ -29,7 +31,8 @@ kde_terminal_ok() { [ "$(kreadconfig6 --file kdeglobals --group General --key Te
 AGENT_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/61-ssh-agent.conf"
 AGENT_WANT='SSH_AUTH_SOCK=${XDG_RUNTIME_DIR}/ssh-agent.socket
 SSH_ASKPASS=/usr/bin/ksshaskpass
-SSH_ASKPASS_REQUIRE=prefer'
+SSH_ASKPASS_REQUIRE=prefer
+SUDO_ASKPASS=/usr/bin/ksshaskpass'
 agent_conf_ok() { [ "$(grep -v -E '^\s*(#|$)' "$AGENT_CONF" 2>/dev/null)" = "$AGENT_WANT" ]; }
 agent_on() { systemctl --user is-enabled -q ssh-agent.socket 2>/dev/null; }
 gcr_off() { [ "$(systemctl --user is-enabled gcr-ssh-agent.socket 2>/dev/null)" = masked ] && ! systemctl --user is-active -q gcr-ssh-agent.socket 2>/dev/null; }
@@ -54,11 +57,11 @@ post() {
     systemctl --user mask --now gcr-ssh-agent.socket gcr-ssh-agent.service
     did "gcr-ssh-agent mask(sk 키 서명을 거절함. GNOME 세션이 다시 켜지 못하게)"
   fi
-  if agent_conf_ok; then ok "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE($AGENT_CONF)"; else
+  if agent_conf_ok; then ok "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE, SUDO_ASKPASS($AGENT_CONF)"; else
     mkdir -p "$(dirname "$AGENT_CONF")"
     printf '# settingfiles desktop.sh: OpenSSH 에이전트(FIDO2 sk 키)와 PIN, 암호를 묻는 창(터미널에서도)\n%s\n' "$AGENT_WANT" > "$AGENT_CONF"
-    systemctl --user set-environment SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket" SSH_ASKPASS=/usr/bin/ksshaskpass SSH_ASKPASS_REQUIRE=prefer
-    did "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE($AGENT_CONF, 새로 여는 앱부터. 이미 뜬 셸과 앱은 다시 열 때)"
+    systemctl --user set-environment SSH_AUTH_SOCK="$XDG_RUNTIME_DIR/ssh-agent.socket" SSH_ASKPASS=/usr/bin/ksshaskpass SSH_ASKPASS_REQUIRE=prefer SUDO_ASKPASS=/usr/bin/ksshaskpass
+    did "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE, SUDO_ASKPASS($AGENT_CONF, 새로 여는 앱부터. 이미 뜬 셸과 앱은 다시 열 때)"
   fi
   if command -v kwriteconfig6 >/dev/null; then
     if kde_terminal_ok; then ok "터미널 앱은 Ghostty(KDE)"; else
@@ -73,7 +76,7 @@ check() {
   if terminal_ok; then ok "터미널 앱은 Ghostty(GTK)"; else todo "터미널 앱 목록($TERMINAL_LIST)이 Ghostty 가 아님"; fi
   if agent_on; then ok "ssh-agent.socket(OpenSSH 에이전트)"; else todo "ssh-agent.socket 꺼져 있음"; fi
   if gcr_off; then ok "gcr-ssh-agent 막힘(mask)"; else todo "gcr-ssh-agent 가 mask 되지 않음(GNOME 세션이 다시 켜고 FIDO2 sk 키 서명을 거절함)"; fi
-  if agent_conf_ok; then ok "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE($AGENT_CONF)"; else todo "$AGENT_CONF 가 다름"; fi
+  if agent_conf_ok; then ok "SSH_AUTH_SOCK, SSH_ASKPASS, SSH_ASKPASS_REQUIRE, SUDO_ASKPASS($AGENT_CONF)"; else todo "$AGENT_CONF 가 다름"; fi
   if command -v kreadconfig6 >/dev/null; then
     if kde_terminal_ok; then ok "터미널 앱은 Ghostty(KDE)"; else todo "kdeglobals TerminalApplication 이 ghostty 가 아님"; fi
   fi

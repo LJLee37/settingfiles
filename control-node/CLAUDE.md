@@ -57,3 +57,17 @@ wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하므로(202
   노드는 화면이 없어 `w3m` 으로 열립니다.
 - 같은 절이 노드의 CLAUDE.md(`server-automation` 의 `roles/agentic_coding/templates/CLAUDE.md.j2`)에도 있습니다.
   고칠 때 둘을 맞춥니다.
+
+## root 명령은 sudo -A 로, 비밀번호는 사용자가 창에 넣습니다
+
+Claude Code 의 Bash 에는 터미널이 없어 `sudo` 가 비밀번호를 받지 못합니다. 그래픽 세션(Plasma)에서는 `sudo -A <명령>` 이
+`SUDO_ASKPASS`(ksshaskpass, settingfiles desktop 프로필)의 창으로 비밀번호를 묻고, 사용자가 그 창에 넣습니다(사용자 결정
+2026-11-19, LJTF 에서 시험함).
+
+- 돌리기 전에 명령과 목적, 영향을 먼저 보여 승인받고, 비밀번호 창이 뜬다고 알립니다. 승인 없이 부르지 않습니다.
+- 명령마다 창이 새로 뜹니다(Claude 의 명령은 매번 새 프로세스라 sudo 의 시간표가 이어지지 않음). 여러 단계면 스크립트 하나로 묶어
+  `sudo -A bash <스크립트>` 로 한 번에 묻습니다.
+- 창의 "Remember password" 는 켜지 말라고 알립니다. 켜면 KWallet 이 비밀번호를 내줘 묻지 않고 root 가 됩니다. 비밀번호가
+  틀렸다고 나오면 한/영이 영어인지부터 봅니다.
+- vault 비밀번호(ansible-vault, land 스크립트의 check 와 apply)와 서명 착륙 스크립트는 지금처럼 사용자 터미널에서 합니다.
+- 화면이 없는 곳(ssh 로 들어온 세션, 노드)에서는 쓸 수 없습니다.

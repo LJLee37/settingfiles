@@ -106,6 +106,14 @@
 - **linger**(`loginctl enable-linger ljlee`)로 herdr 서버가 로그아웃 뒤에도 남습니다. 그래서 사용자 관리자와 세션 D-Bus
   도 남습니다. `WantedBy=default.target` 서비스는 다음 로그인 때 다시 뜨지 않고, D-Bus 서비스 파일은 ReloadConfig
   전까지 반영되지 않습니다.
+  - **세션이 끝났다 다시 시작한 뒤**(로그아웃했다 들어옴, 로그인 화면 바꾸기): Plasma 가 끝나며 사용자 관리자 환경에서
+    `XDG_CURRENT_DESKTOP` 을 지우는데, 그 사이에 깨워진 xdg-desktop-portal 은 KDE 포털을 고르지 않고 떠서 다음 로그인에도
+    그대로 남습니다. 화면 공유, 스크린샷, 원격 제어가 빠집니다(2026-11-19 Discord 화면 공유). 확인은 `busctl --user
+    get-property org.freedesktop.portal.Desktop /org/freedesktop/portal/desktop org.freedesktop.portal.ScreenCast version` 이
+    "No such interface" 인지, 해결은 `systemctl --user restart xdg-desktop-portal` 입니다. 막는 설정(drop-in)은 두지 않고
+    문서로만 둡니다(사용자 결정 2026-11-20). 같은 때 WayDroid 도 다시 열어야 합니다(`ljgaming/docs/waydroid.md`).
+  - 로그인 화면은 세션 안에서 멈추지 말고 disable, enable 뒤 재부팅으로 바꿉니다. 데스크탑(GNOME 등)을 지운 뒤에도 그
+    사용자 서비스가 지워진 실행 파일로 남아 돌므로 재부팅합니다.
 - **한글 입력**: `~/.config/environment.d/60-ibus-xim.conf` 의 `XMODIFIERS=@im=ibus`(plasma 프로필의 `plasma.sh` 가
   만듦)와, Steam 에만 둔 `GTK_IM_MODULE=ibus`(데스크톱 파일 사본, 이것도 `plasma.sh` 가 만듦)입니다. Plasma Wayland 에서 XWayland 앱(Steam)의
   한글 입력 때문입니다.

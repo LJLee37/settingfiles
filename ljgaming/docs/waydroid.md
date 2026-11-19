@@ -71,6 +71,9 @@ PKGBUILD 를 사용자에게 보여 승인받습니다. 2026-11-18 의 스크립
 
 - 루팅(Magisk), 기기 정보 위조, 보안 검사 우회는 하지 않습니다. 원스토어가 "보안 취약 단말"로 막으면 멈추고 Windows 원게임루프로 씁니다.
 - 커널이나 NVIDIA 드라이버를 올린 뒤에는 `waydroid-nvidia-setup --mode venus` 를 다시 돌립니다(root).
+- 로그아웃했다 들어오거나 로그인 화면을 바꾼 뒤에는, WayDroid 가 켜져 있었으면 `waydroid session stop` 하고 다시 엽니다.
+  세션은 처음 붙은 화면 연결(새 KWin 이 같은 이름 `wayland-1` 로 다시 만들어도 옛 소켓)을 잡고 있어, `waydroid status` 가
+  RUNNING 이어도 새 화면에 창을 못 띄우고 앱을 열면 surfaceflinger 가 죽습니다(2026-11-19).
 
 ## 되돌리기
 

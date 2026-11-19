@@ -148,16 +148,16 @@ else
 fi
 
 # --- 4. 커밋 서명 --------------------------------------------------------------
-# server-automation 은 서명 필수(pre-push 가 막음). 서명은 FIDO2 키 핸들 파일로 하고, GNOME 의
-# gcr-ssh-agent 가 sk 키 서명을 가로채 거절하므로 ssh-keygen 을 에이전트 없이 부르는 래퍼를 겁니다.
+# server-automation 은 서명 필수(pre-push 가 막음). 서명은 FIDO2 키로 하고, git 은 아래 래퍼로 ssh-keygen 을 부릅니다.
+# GNOME 의 gcr-ssh-agent 를 쓰던 때는 래퍼가 에이전트를 끊었지만, 2026-11-19 부터는 desktop 프로필이 gcr 를 막고 OpenSSH
+# 에이전트를 쓰므로 그대로 넘깁니다(LJTF 에서 에이전트로 서명되는 것을 시험함).
 step "커밋 서명"
 sign_wrapper="$HOME/.local/bin/git-ssh-sign"
 want_wrapper='#!/usr/bin/env bash
 # git 의 SSH 서명(gpg.ssh.program)용 래퍼. settingfiles install-control-node.sh 가 둡니다.
-# GNOME Keyring 의 gcr-ssh-agent 는 FIDO2(sk-*) 키 서명을 구현하지 않는데, ssh-keygen -Y sign 은
-# 키가 에이전트에 보이면 파일보다 에이전트를 우선해 "agent refused operation" 으로 죽습니다.
-# SSH_AUTH_SOCK 을 지우면 핸들을 직접 열고 자기 tty 에서 PIN 을 묻습니다.
-unset SSH_AUTH_SOCK
+# 토큰 키가 OpenSSH 에이전트에 있으면 에이전트로, 없으면 핸들 파일로 서명하고, PIN 은 ksshaskpass 창으로 묻습니다
+# (desktop 프로필의 SSH_ASKPASS_REQUIRE=prefer). GNOME 의 gcr-ssh-agent 는 sk 키 서명을 거절해서 예전에는 여기서
+# SSH_AUTH_SOCK 을 지웠습니다(2026-11-19 까지).
 exec /usr/bin/ssh-keygen "$@"'
 # 주석은 비교하지 않습니다(손으로 둔 옛 래퍼도 명령이 같으면 그대로 둠).
 code_only() { grep -v -E '^\s*(#|$)' || true; }
@@ -271,15 +271,31 @@ else
   todo "server-automation 이 없어 인증서 설정을 건너뜀"
 fi
 
-# github.com 은 에이전트를 끊고 FIDO2 키 파일을 직접 쓰게 합니다(gcr-ssh-agent 가 sk 키 서명을
-# 거절). ssh-cert-setup.sh 의 관리 블록 밖에 둬야 그 스크립트를 다시 돌려도 남습니다.
-if grep -q '^Host github.com' "$HOME/.ssh/config" 2>/dev/null; then
-  ok "~/.ssh/config 의 github.com 블록"
-elif doing; then
-  printf '\n# settingfiles install-control-node.sh: GitHub SSH 는 에이전트 없이 FIDO2 키 파일로(gcr-ssh-agent 가 sk 서명을 거절)\nHost github.com\n    IdentityAgent none\n    IdentitiesOnly yes\n    IdentityFile ~/.ssh/%s\n' "$FIDO_KEY" >> "$HOME/.ssh/config"
-  did "~/.ssh/config 에 github.com 블록"
+# github.com 은 FIDO2 키로 붙고, 처음 쓸 때 그 키를 OpenSSH 에이전트에 올립니다(AddKeysToAgent, LJGaming 과 같음). 그 뒤로는
+# 에이전트가 서명하고 PIN 은 ksshaskpass 창으로 묻습니다. ssh-cert-setup.sh 의 관리 블록 밖에 둬야 그 스크립트를 다시 돌려도
+# 남습니다. GNOME 의 gcr-ssh-agent 를 쓰던 때는 IdentityAgent none 으로 에이전트를 끊었는데(sk 서명을 거절), 그 옛 블록이
+# 있으면 ~/.ssh/config.bak-github-<날짜> 를 남기고 그 줄만 바꿉니다(2026-11-19).
+github_old() { awk '/^Host /{g=($2=="github.com")} g && /^[[:space:]]+IdentityAgent[[:space:]]+none/{f=1} END{exit !f}' "$HOME/.ssh/config" 2>/dev/null; }
+if ! grep -q '^Host github.com' "$HOME/.ssh/config" 2>/dev/null; then
+  if doing; then
+    printf '\n# settingfiles install-control-node.sh: GitHub SSH 는 FIDO2 키로, OpenSSH 에이전트를 거쳐(처음 쓸 때 올림)\nHost github.com\n    AddKeysToAgent yes\n    IdentitiesOnly yes\n    IdentityFile ~/.ssh/%s\n' "$FIDO_KEY" >> "$HOME/.ssh/config"
+    did "~/.ssh/config 에 github.com 블록"
+  else
+    todo "~/.ssh/config 에 github.com 블록 없음"
+  fi
+elif github_old; then
+  if doing; then
+    cp -p "$HOME/.ssh/config" "$HOME/.ssh/config.bak-github-$(date +%Y%m%d)"
+    awk '/^Host /{g=($2=="github.com")}
+         g && /^[[:space:]]+IdentityAgent[[:space:]]+none/{print "    AddKeysToAgent yes"; next}
+         /^# settingfiles install-control-node.sh: GitHub SSH 는 에이전트 없이/{print "# settingfiles install-control-node.sh: GitHub SSH 는 FIDO2 키로, OpenSSH 에이전트를 거쳐(처음 쓸 때 올림)"; next}
+         {print}' "$HOME/.ssh/config.bak-github-$(date +%Y%m%d)" > "$HOME/.ssh/config"
+    did "~/.ssh/config 의 github.com 블록: IdentityAgent none 을 AddKeysToAgent yes 로(백업 config.bak-github-$(date +%Y%m%d))"
+  else
+    todo "~/.ssh/config 의 github.com 블록이 옛 모양(IdentityAgent none)"
+  fi
 else
-  todo "~/.ssh/config 에 github.com 블록 없음"
+  ok "~/.ssh/config 의 github.com 블록"
 fi
 
 # 로그인할 때 인증서 키(id_ed25519, 같은 이름의 -cert.pub 도 같이)를 OpenSSH 에이전트에 올립니다(2026-11-19, Plasma 로 바꾼 뒤).

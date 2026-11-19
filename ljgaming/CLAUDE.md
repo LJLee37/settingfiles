@@ -11,9 +11,9 @@
   - p5 는 Arch 로, btrfs `ljgaming-root` 에 서브볼륨 `@ @home @snapshots @var_log @pkg` 가 있습니다.
 - **부팅**: GRUB(`EFI/Arch`)과 os-prober 를 씁니다. Windows ESP 를 `/efi` 에 같이 마운트하고, `/boot` 는 btrfs 루트 안에
   있습니다. Secure Boot 는 꺼져 있습니다.
-- **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음). GNOME 과 Plasma 6 를 같이
-  깔았습니다(둘 다 Wayland). 로그인 화면은 GDM 이고, plasma-login-manager 는 깔기만 했습니다.
-- **프로필**: settingfiles 의 `base snapshots nvidia desktop plasma gnome gaming apps office` 입니다(2026-11-18). 이 기기는
+- **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음). Plasma 6(Wayland)만
+  씁니다. GNOME 은 2026-11-19 에 지웠고(사용자 승인), 로그인 화면은 plasma-login-manager 입니다.
+- **프로필**: settingfiles 의 `base snapshots nvidia desktop plasma gaming apps office` 입니다(2026-11-19). 이 기기는
   `hosts/*.env` 가 없으니 `./install-profile.sh --check <위 목록>` 으로 빠진 것을 봅니다. 프로필에 없이 손으로 깐 것(os-prober,
   pam-u2f, shairport-sync 와 nqptp, waydroid-nvidia-bin 과 waydroid-script-git)은 아래 문서에 있습니다.
 - **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
@@ -36,7 +36,7 @@
 
 - `ljgaming/docs/waydroid.md`: WayDroid(원스토어용). waydroid-nvidia-bin 0.2.0 `--mode venus`, GAPPS(LineageOS 20,
   Android 13), libhoudini, 창 1280x720 고정이고 Plasma 에서만 씁니다(GNOME 에서는 hwcomposer 가 죽음, #21). 소리는 안
-  나고(사용자가 미룸), 재부팅 뒤 컨테이너 자동 시작과 binder 링크는 아직 확인하지 않았습니다.
+  나고(사용자가 미룸), 재부팅 뒤 컨테이너는 저절로 뜨고, binder 는 세션을 시작할 때 생깁니다(2026-11-19 확인).
 - `ljgaming/docs/airplay.md`: AirPlay 2 수신기 "LJGaming" 하나(직접 빌드한 shairport-sync 5.6.3 과 nqptp 1.2.9, 보안
   갱신은 직접 챙김). 1시간 시험 통과(2026-11-18). 남은 확인은 로그아웃 뒤 다시 로그인했을 때 저절로 돌아오는지, 절전
   복귀 뒤 D802C 잡음이 없어지는지입니다. AirPlay 2 모드에서는 수신기가 원격 제어(다음 곡 등)를 보낼 수 없어, 곡이
@@ -63,7 +63,7 @@
   비밀번호가 틀린 것처럼 보입니다.
 - sudo 와 polkit 은 `/etc/pam.d/sudo` 와 `/etc/pam.d/polkit-1` 에서 비밀번호(system-auth) 다음에 pam_u2f 를
   요구합니다(`/etc/u2f_mappings`, root 소유, origin 과 appid `pam://LJGaming`). 등록 정보를 사용자 홈
-  (`~/.config/Yubico`)에 두지 않는 것은 약한 로그인 비밀번호만으로 바꿔칠 수 있기 때문입니다. 로그인 화면(GDM), su,
+  (`~/.config/Yubico`)에 두지 않는 것은 약한 로그인 비밀번호만으로 바꿔칠 수 있기 때문입니다. 로그인 화면(plasma-login-manager), su,
   콘솔 로그인은 그대로이고, root 비밀번호가 비상구입니다. 절차와 토큰 교체, 되돌리기는 settingfiles 의 `docs/pam-u2f.md`
   입니다.
 - 파티션, 포맷, 부트로더, 펌웨어 부트 항목은 명령 하나씩 승인받습니다. Windows 파티션과 ESP 의 `EFI/Microsoft` 는
@@ -75,6 +75,9 @@
 
 - 그룹째 깔지 않고 쓰는 것만 이름으로 깝니다. 기준은 settingfiles 의 `profiles/*.txt` 입니다. 설치 때 `gnome` 그룹을
   통째로 깔았다가 원치 않는 앱이 들어와 정리한 적이 있습니다.
+- 이 기기는 settingfiles 스크립트 없이 깔아서 base 의 패키지도 다른 것의 의존성으로만 들어와 있을 수 있습니다. 프로필을
+  통째로 지울 때는 지울 목록을 남는 프로필 목록과 맞춰 보고, 남길 것은 먼저 `pacman -D --asexplicit` 로 표시합니다
+  (2026-11-19 GNOME 을 지울 때 openssh 가 같이 빠져 다시 깔았음).
 - 터미널은 Ghostty 하나만 씁니다. 편집기는 nvim 이고, `vim` 은 nvim 을 가리키는 링크입니다. gnome-text-editor 는
   지웠습니다(nvim 으로 충분, 사용자 2026-11-17).
 - AUR 헬퍼(yay, paru)는 쓰지 않습니다. `git clone https://aur.archlinux.org/<이름>.git ~/aur/<이름>` 를 한 뒤 PKGBUILD 를
@@ -84,9 +87,8 @@
 
 ## 로그인, 비밀 저장소, SSH (2026-11-18)
 
-- **비밀 저장소는 KWallet** 입니다. gnome-keyring 패키지는 남기고 사용자 유닛을 mask 했습니다. `/etc/pam.d/gdm-password`
-  와 `/etc/pam.d/plasmalogin` 을 덮어써 pam_gnome_keyring 을 빼고, gdm-password 에 pam_kwallet5 를 넣었습니다. 지갑은
-  로그인 비밀번호로 저절로 열립니다.
+- **비밀 저장소는 KWallet** 입니다. `/etc/pam.d/plasmalogin` 의 pam_kwallet5 로 로그인 비밀번호와 함께 저절로 열립니다.
+  gnome-keyring 과 옛 키링 파일(`~/.local/share/keyrings`)은 2026-11-19 GNOME 과 함께 지웠습니다.
 - **SSH 에이전트**는 OpenSSH 의 `ssh-agent.socket` 과 ksshaskpass 입니다(`~/.config/environment.d/61-ssh-agent.conf`).
   gcr-ssh-agent 는 FIDO2(sk) 키로 서명하지 못합니다. `~/.ssh/config` 의 main-server 블록이 이 에이전트와 토큰 A, B 의
   sk 키를 씁니다.

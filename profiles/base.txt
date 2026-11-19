@@ -30,6 +30,7 @@ man-pages
 texinfo
 fastfetch           # .zshrc 가 셸을 열 때마다 부름
 htop
+unzip               # zip 압축 풀기(LJGaming 에서 GNOME 을 지울 때 같이 빠졌던 것, 2026-11-19)
 pacman-contrib      # paccache(패키지 캐시 정리), checkupdates, pactree
 nodejs              # nvim 의 coc.nvim. nvm 이 없어도 nvim 이 돌게 둡니다(사용자 결정 2026-11-17)
 pnpm                # nvim 플러그인과 node provider(set.sh 가 pnpm add -g neovim). yarn 대신(2026-11-17)

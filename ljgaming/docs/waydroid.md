@@ -10,7 +10,9 @@
 - **구성:** waydroid-nvidia-bin 0.2.0(AUR) `--mode venus`, Plasma 6 Wayland 세션, LineageOS 20 **GAPPS**(안드로이드 13), ARM 번역 libhoudini,
   창 1280x720 고정.
 - **안 되는 것:** 소리(사용자가 미룸, 원인 미조사). 창을 끌어서 크기 바꾸기(venus 모드의 한계).
-- **확인 안 한 것:** 재부팅 뒤 컨테이너 자동 시작과 binder 링크(#45), GLES 렌더러 문자열(`nvidia-smi` 로 GPU 사용만 확인).
+- **재부팅 뒤(2026-11-19 확인):** 컨테이너가 부팅 때 저절로 뜨고 wd-venus 도 active. 부팅 직후에는 binder 가 없고
+  `waydroid session start` 때 binderfs 를 올리고 링크를 만들어 안드로이드가 부팅함(#45 는 이 기기에 해당 없음). 창 속성도 그대로.
+- **확인 안 한 것:** GLES 렌더러 문자열(`nvidia-smi` 로 GPU 사용만 확인).
 
 ## 왜 이 조합인가
 

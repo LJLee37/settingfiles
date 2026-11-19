@@ -21,6 +21,10 @@ alsa-utils              # aplay, amixer(장치 확인)
 # 블루투스(desktop.sh 가 bluetooth.service 를 켬. 꺼져 있으면 설정 화면의 블루투스가 동작하지 않음)
 bluez
 bluez-utils
+bluez-obex              # 블루투스 파일 전송(Plasma bluedevil 의 optdepends, GNOME 은 gnome-bluetooth 가 끌어옴)
+# 다른 기기와 연결(2026-11-19, LJGaming 에서 GNOME 을 지울 때 같이 빠졌던 것)
+usbmuxd                 # iPhone USB 연결(libimobiledevice 의 데몬. Dolphin 의 kio-extras 가 씀)
+freerdp                 # 원격 데스크톱 RDP(krdc 의 optdepends, gnome-connections 도 씀)
 # SSH 와 FIDO2 토큰: OpenSSH 자체 에이전트(openssh, base)와 PIN 과 터치 확인 창. desktop.sh 가 에이전트를 켭니다(2026-11-18)
 ksshaskpass             # 터미널이 없을 때(herdr, Dolphin, git GUI) ssh 의 PIN 과 "confirm user presence" 를 묻는 창. GNOME 에서도 씀
 # 오프라인 위키를 그래픽으로 볼 때는 base 의 wiki-search-html 이 기본 웹 브라우저로 엽니다(따로 리더를 두지 않음, 사용자 2026-11-18)

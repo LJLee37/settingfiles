@@ -11,4 +11,3 @@ lib32-gamemode
 mangohud                # 게임 위 FPS, 부하, 온도 표시
 lib32-mangohud
 gamescope               # 게임 하나만 띄우는 컴포지터(스케일링, 프레임 제한)
-cartridges              # 여러 런처의 게임을 한곳에서

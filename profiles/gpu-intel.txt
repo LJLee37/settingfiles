@@ -1,0 +1,4 @@
+# Intel 그래픽(내장 그래픽과 Arc, 2026-11-19 portable 과 gaming 에서 모음). Proton 게임은 Vulkan 으로 돌아서 32비트 드라이버도 둡니다.
+vulkan-intel
+lib32-vulkan-intel      # Steam(32비트)용. multilib 가 필요해 gpu-intel.sh 가 먼저 켭니다
+intel-media-driver      # 영상 하드웨어 디코딩(Intel Broadwell 이후)

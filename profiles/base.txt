@@ -3,8 +3,7 @@ base
 linux
 linux-headers       # 커널 모듈을 직접 빌드해야 할 때(DKMS 등)를 대비해 둠(사용자 결정 2026-11-18)
 linux-firmware
-intel-ucode         # CPU 제조사를 가리지 않게 둘 다(GRUB 이 맞는 것을 씀)
-amd-ucode
+# CPU 마이크로코드는 cpu-intel, cpu-amd 프로필입니다(install1.sh 가 PROFILES 의 cpu-* 를 base 와 같이 pacstrap)
 # 부팅과 디스크
 grub
 efibootmgr

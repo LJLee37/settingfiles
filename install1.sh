@@ -36,8 +36,16 @@ mountpoint -q "$TARGET/boot" || mount --mkdir -o fmask=0077,dmask=0077 "$esp" "$
 findmnt -R "$TARGET"
 
 say "pacstrap"
+# CPU 마이크로코드(PROFILES 의 cpu-* 프로필)도 base 와 같이 깝니다. 아래 install2.sh 의 mkinitcpio 와 grub-mkconfig 가
+# 보게 하려는 것입니다. PORTABLE 의 기본 initramfs 는 autodetect 가 microcode 훅 앞이라 이 컴퓨터의 CPU 것만 담고,
+# 다른 제조사 CPU 에서는 grub-mkconfig 가 넣은 /boot/*-ucode.img 가 대신 올라갑니다(ArchWiki 「Microcode」).
+cpu_profiles=()
+for p in ${PROFILES:-}; do
+  case $p in cpu-*) [ -f "profiles/$p.txt" ] || die "그런 프로필이 없음: $p"; cpu_profiles+=("profiles/$p.txt") ;; esac
+done
+[ ${#cpu_profiles[@]} -gt 0 ] || say "주의: PROFILES 에 cpu-intel 이나 cpu-amd 가 없어 CPU 마이크로코드를 깔지 않습니다"
 # shellcheck disable=SC2046
-pacstrap -K "$TARGET" $(read_list profiles/base.txt)
+pacstrap -K "$TARGET" $(read_list profiles/base.txt) $(for f in "${cpu_profiles[@]}"; do read_list "$f"; done)
 
 say "fstab"
 if ! grep -qE '^[[:space:]]*[^#[:space:]]' "$TARGET/etc/fstab"; then

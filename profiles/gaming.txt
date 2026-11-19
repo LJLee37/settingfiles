@@ -1,10 +1,6 @@
 # 게임(2026-11-18 steam 프로필에서 이름을 바꾸고 넓힘). Proton 게임은 Vulkan 으로 돌아서 GPU 마다 32비트 드라이버도
-# 필요합니다(NVIDIA 는 nvidia 프로필). 실행 옵션: gamemoderun %command%, MANGOHUD=1 %command%.
+# 필요합니다(gpu-intel, gpu-amd, gpu-nvidia 프로필에 있음). 실행 옵션: gamemoderun %command%, MANGOHUD=1 %command%.
 steam
-vulkan-intel
-vulkan-radeon
-lib32-vulkan-intel
-lib32-vulkan-radeon
 ntsync-autoload         # Wine/Proton 의 NTSync(ArchWiki 「Steam」이 권함). 재부팅 뒤 /dev/ntsync
 gamemode                # 게임 중 CPU 성능 모드
 lib32-gamemode

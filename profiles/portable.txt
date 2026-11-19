@@ -3,7 +3,5 @@
 sof-firmware            # 요즘 노트북 상당수의 내장 사운드. 없으면 소리가 안 남
 alsa-firmware
 mesa
-vulkan-intel            # Proton 게임은 Vulkan 으로 돕니다. 그 GPU 의 드라이버가 없으면 게임이 안 됨
-vulkan-radeon
-intel-media-driver      # 영상 하드웨어 디코딩(Intel Broadwell 이후)
+# CPU 마이크로코드와 GPU 드라이버는 cpu-intel, cpu-amd, gpu-intel, gpu-amd, gpu-nvidia 프로필을 모두 둡니다(hosts 의 PROFILES)
 power-profiles-daemon   # 노트북 전원 모드

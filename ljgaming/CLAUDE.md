@@ -13,7 +13,7 @@
   있습니다. Secure Boot 는 꺼져 있습니다.
 - **그래픽과 데스크톱**: nvidia-open(systemd 기반 initramfs, HOOKS 에 `kms` 없음). Plasma 6(Wayland)만
   씁니다. GNOME 은 2026-11-19 에 지웠고(사용자 승인), 로그인 화면은 plasma-login-manager 입니다.
-- **프로필**: settingfiles 의 `base snapshots nvidia desktop plasma gaming apps office` 입니다(2026-11-19). 이 기기는
+- **프로필**: settingfiles 의 `base snapshots cpu-intel gpu-nvidia desktop plasma gaming apps office` 입니다(2026-11-19). 이 기기는
   `hosts/*.env` 가 없으니 `./install-profile.sh --check <위 목록>` 으로 빠진 것을 봅니다. 프로필에 없이 손으로 깐 것(os-prober,
   pam-u2f, shairport-sync 와 nqptp, waydroid-nvidia-bin 과 waydroid-script-git)은 아래 문서에 있습니다.
 - **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
@@ -188,7 +188,7 @@ wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하곤 하므
   절전 복귀 뒤 D802C 가 백색소음을 내서, `/etc/systemd/system/ljlee-pipewire-resume.service` 가 복귀 2초 뒤 사용자
   PipeWire 를 다시 시작합니다.
 - **herdr**: `~/.local/bin/herdr` 에 있고 Claude 통합이 깔려 있습니다. 설정은 settingfiles 의 `herdr-config` 링크입니다.
-- **GPU 사용량**은 nvtop(settingfiles 의 nvidia 프로필)이나 nvidia-smi 로 봅니다. htop 의 GPU 미터는 `/proc/*/fdinfo` 의 `drm-engine-*` 를 더하는데
+- **GPU 사용량**은 nvtop(settingfiles 의 gpu-nvidia 프로필)이나 nvidia-smi 로 봅니다. htop 의 GPU 미터는 `/proc/*/fdinfo` 의 `drm-engine-*` 를 더하는데
   NVIDIA 드라이버는 그 키를 내지 않아 늘 0 입니다.
 - **네트워크**: iPhone, iPad, 컨트롤 노드가 이 기기와 같은 서브넷에 있습니다(사용자 2026-11-17).
 - **NAS**: main-server 의 NAS 는 IKEv2 VPN 연결 "main-server VPN"(networkmanager-strongswan, EAP 사용자 ljlee,

@@ -14,7 +14,10 @@ XIM_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/environment.d/60-ibus-xim.conf"
 kv() { kreadconfig6 --file "$1" --group "$2" --key "$3" 2>/dev/null; }
 im_ok() { [ "$(kv kwinrc Wayland InputMethod)" = "$IBUS_IM" ]; }
 engines_ok() { gsettings get org.freedesktop.ibus.general preload-engines 2>/dev/null | grep -q hangul; }
-hangul_key_ok() { [ "$(kv kxkbrc Layout Options)" = korean:ralt_hangul ] && [ "$(kv kxkbrc Layout ResetOldOptions)" = true ]; }
+# localectl 은 정하지 않은 값을 "(unset)" 으로 찍습니다. 그 글자가 배치 이름으로 들어가면 KWin 이 배치를 쓰지 못해 옵션도
+# 먹지 않습니다(2026-11-19 LJTF: 오른쪽 Alt+Space 가 그대로 KRunner 를 엶). 그래서 배치 이름이 쓸 만한지도 봅니다.
+xkb_value() { case $1 in ""|"(unset)") return 1 ;; esac; printf '%s' "$1"; }
+hangul_key_ok() { xkb_value "$(kv kxkbrc Layout LayoutList)" >/dev/null && [ "$(kv kxkbrc Layout Options)" = korean:ralt_hangul ] && [ "$(kv kxkbrc Layout ResetOldOptions)" = true ]; }
 xim_ok() { grep -qx 'XMODIFIERS=@im=ibus' "$XIM_CONF" 2>/dev/null; }
 # 로그인 화면의 PAM 파일은 /etc/pam.d 에 덮어쓴 것이 있으면 그것, 없으면 패키지 기본값(/usr/lib/pam.d)을 봅니다. plasmalogin 의
 # 기본값에는 pam_kwallet5 가 이미 있습니다(plasma-login-manager 6.8.3, 2026-11-19 LJGaming 확인).
@@ -120,9 +123,10 @@ post() {
   fi
   if hangul_key_ok; then ok "오른쪽 Alt = 한/영"; else
     local layout model
-    layout=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: //p'); model=$(localectl status 2>/dev/null | sed -n 's/^ *X11 Model: //p')
-    [ -n "$(kv kxkbrc Layout LayoutList)" ] || kwriteconfig6 --file kxkbrc --group Layout --key LayoutList "${layout:-us}"
-    [ -n "$(kv kxkbrc Layout Model)" ] || kwriteconfig6 --file kxkbrc --group Layout --key Model "${model:-pc105}"
+    layout=$(xkb_value "$(localectl status 2>/dev/null | sed -n 's/^ *X11 Layout: //p')") || layout=us
+    model=$(xkb_value "$(localectl status 2>/dev/null | sed -n 's/^ *X11 Model: //p')") || model=pc105
+    xkb_value "$(kv kxkbrc Layout LayoutList)" >/dev/null || kwriteconfig6 --file kxkbrc --group Layout --key LayoutList "$layout"
+    xkb_value "$(kv kxkbrc Layout Model)" >/dev/null || kwriteconfig6 --file kxkbrc --group Layout --key Model "$model"
     kwriteconfig6 --file kxkbrc --group Layout --key Use true
     kwriteconfig6 --file kxkbrc --group Layout --key ResetOldOptions true
     kwriteconfig6 --notify --file kxkbrc --group Layout --key Options ''
@@ -139,7 +143,7 @@ post() {
 check() {
   if im_ok; then ok "가상 키보드 IBus Wayland"; else todo "kwinrc InputMethod 가 IBus Wayland 가 아님"; fi
   if engines_ok; then ok "IBus 엔진 hangul"; else todo "IBus preload-engines 에 hangul 없음"; fi
-  if hangul_key_ok; then ok "오른쪽 Alt = 한/영"; else todo "kxkbrc Options 가 korean:ralt_hangul 이 아님"; fi
+  if hangul_key_ok; then ok "오른쪽 Alt = 한/영"; else todo "kxkbrc 의 LayoutList 가 비었거나 (unset), 또는 Options 가 korean:ralt_hangul 이 아님"; fi
   if xim_ok; then ok "XMODIFIERS=@im=ibus"; else todo "$XIM_CONF 없음"; fi
   if kwallet_pam_ok; then ok "로그인 때 KWallet 열기(pam_kwallet5)"; else todo "로그인 화면 PAM(plasmalogin, gdm-password)에 pam_kwallet5 없음(손으로, ljgaming/CLAUDE.md 참고)"; fi
   appearance_check

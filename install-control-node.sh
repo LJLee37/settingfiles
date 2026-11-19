@@ -282,6 +282,27 @@ else
   todo "~/.ssh/config 에 github.com 블록 없음"
 fi
 
+# 로그인할 때 인증서 키(id_ed25519, 같은 이름의 -cert.pub 도 같이)를 OpenSSH 에이전트에 올립니다(2026-11-19, Plasma 로 바꾼 뒤).
+# GNOME 때는 gcr-ssh-agent 가 이 키를 키링으로 조용히 내줬지만 OpenSSH 에이전트는 비어서 시작하므로, herdr 의 저장된 머신이
+# 끊긴 뒤 다시 붙을 때 ssh 가 토큰 키로 넘어가 30초마다 PIN 창을 띄웠습니다. 암호는 ksshaskpass 가 처음 한 번 묻고, 그때
+# "Remember password" 를 켜면 KWallet 에 두고 다음 로그인부터 조용히 읽습니다(ArchWiki 「KDE Wallet」, arch-wiki-docs 20261101).
+# 인증서가 끝나면 다시 토큰 키로 넘어가므로 그날 인증서를 받습니다(ssh-cert-issue.sh, ~/.ssh/config 의 CertificateFile).
+ssh_add_autostart="$HOME/.config/autostart/ssh-add-id_ed25519.desktop"
+want_ssh_add=$(printf '%s\n' '[Desktop Entry]' 'Type=Application' 'Name=ssh-add id_ed25519' \
+  'Comment=settingfiles install-control-node.sh: 로그인할 때 인증서 키를 OpenSSH 에이전트에 올림(암호는 KWallet)' \
+  "Exec=env SSH_ASKPASS_REQUIRE=prefer ssh-add -q $HOME/.ssh/id_ed25519" 'NoDisplay=true' 'X-KDE-autostart-phase=2')
+if [ ! -f "$HOME/.ssh/id_ed25519" ]; then
+  todo "~/.ssh/id_ed25519 없음(인증서 설정 뒤 다시 돌리세요)"
+elif [ "$(cat "$ssh_add_autostart" 2>/dev/null)" = "$want_ssh_add" ]; then
+  ok "$ssh_add_autostart"
+elif doing; then
+  mkdir -p "$(dirname "$ssh_add_autostart")"
+  printf '%s\n' "$want_ssh_add" > "$ssh_add_autostart"
+  did "$ssh_add_autostart (다음 로그인부터. 처음 암호를 물으면 Remember password 를 켬)"
+else
+  todo "$ssh_add_autostart 없음 또는 다름"
+fi
+
 # --- 6. Ansible -------------------------------------------------------------------
 step "Ansible"
 if [ -f "$SA/requirements.yml" ]; then
@@ -511,7 +532,7 @@ if [ -x "$herdr_bin" ]; then
     todo "herdr Claude 통합 없음 또는 낡음"
   fi
 fi
-manual+=("herdr 원격: herdr machine add <노드의 ssh 주소> 로 저장하거나 herdr --remote <노드의 ssh 주소>(주소는 server-automation 의 host_vars). 백그라운드 재접속은 인증서가 ssh-agent 에 있을 때만 됩니다.")
+manual+=("herdr 원격: herdr machine add <노드의 ssh 주소> 로 저장하거나 herdr --remote <노드의 ssh 주소>(주소는 server-automation 의 host_vars). 백그라운드 재접속은 인증서 키가 ssh-agent 에 있을 때만 조용히 됩니다(5절의 자동 시작이 로그인 때 올림).")
 
 # --- 손으로 할 것 -----------------------------------------------------------------
 manual+=("Claude Code 로그인(claude 를 한 번 실행)과, 다른 세션과 대화할 때 /remote-control.")

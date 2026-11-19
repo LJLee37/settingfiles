@@ -80,7 +80,13 @@ appearance_post() {
   if icons_ok; then ok "아이콘 $ICONS"; else
     /usr/lib/plasma-changeicons "$ICONS" >/dev/null && did "아이콘 $ICONS"
   fi
-  if plasma_running; then panels_eval apply | panels_report
+  if plasma_running; then
+    # 새로 넣은 위젯은 plasmashell 이 스크립트가 끝난 뒤 순서 목록(AppletOrder) 맨 뒤에 덧붙여, 같은 실행에서 쓴 순서를
+    # 덮어씁니다(2026-11-19 LJTF). 그래서 무엇을 바꿨으면 한 번 더 돌려 순서를 맞춥니다.
+    local r
+    r=$(panels_eval apply)
+    printf '%s\n' "$r" | panels_report
+    case $r in *"did: "*) sleep 1; panels_eval apply | panels_report ;; esac
   else todo "패널은 Plasma 세션에서 다시 돌릴 때 맞춤"; fi
   local f g k v power=0
   while IFS='|' read -r f g k v; do

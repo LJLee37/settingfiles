@@ -60,10 +60,19 @@ missing=""
 [ ${#repo[@]} -eq 0 ] || missing=$(pacman -T "${repo[@]}" | awk '!seen[$0]++' | tr '\n' ' ' || true)
 aur_missing=()
 for a in "${aur[@]}"; do pacman -Q "$a" >/dev/null 2>&1 || aur_missing+=("$a"); done
+# 프로필에 적힌 패키지가 다른 패키지의 의존성으로만 깔려 있으면 "직접 설치"로 표시합니다(2026-11-19). 그대로 두면 다른
+# 프로필을 지울 때(pacman -Rns) 더 쓰는 곳이 없는 의존성으로 보여 같이 빠집니다(LJGaming 에서 GNOME 을 지울 때 openssh 가
+# 빠진 일). pacman -S --needed 는 이미 깔린 것을 건너뛰어 이 표시를 바꾸지 않습니다.
+as_deps() {
+  [ $(( ${#repo[@]} + ${#aur[@]} )) -gt 0 ] || return 0   # 이름 없이 부르면 모든 의존성이 나옴
+  { pacman -Qdq "${repo[@]}" "${aur[@]}" 2>/dev/null || true; } | tr '\n' ' '
+}
 
 if [ "$CHECK" -eq 1 ]; then
   say "프로필: $*"
   if [ -z "${missing// }" ]; then ok "pacman 패키지 ${#repo[@]}개"; else todo "pacman: $missing"; fi
+  deps=$(as_deps)
+  if [ -z "${deps// }" ]; then ok "깔린 것은 모두 직접 설치로 표시됨"; else todo "의존성으로만 깔림(직접 설치로 표시 필요): $deps"; fi
   for a in "${aur[@]}"; do
     if pacman -Q "$a" >/dev/null 2>&1; then ok "$a (AUR)"; else todo "$a (AUR)"; fi
   done
@@ -93,6 +102,13 @@ if [ ${#aur_missing[@]} -gt 0 ]; then
       did "$a (AUR)"
     done
   fi
+fi
+
+deps=$(as_deps)
+if [ -n "${deps// }" ]; then
+  # shellcheck disable=SC2086
+  as_root pacman -D --asexplicit $deps >/dev/null
+  did "직접 설치로 표시: $deps"
 fi
 
 for p in "$@"; do run_hook "$p" post; done

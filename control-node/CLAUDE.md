@@ -53,7 +53,7 @@ wiki.archlinux.org 는 봇 차단(Anubis)으로 WebFetch 를 거절하므로(202
   `w3m -dump /usr/share/doc/arch-wiki/html/en/<제목>.html`(제목의 빈칸은 `_`).
 - 답할 때 사본의 판(`pacman -Q arch-wiki-docs`, 매달 새 판)을 함께 말합니다. 그 뒤에 바뀌었을 수 있는 내용(패키지
   판, 하드웨어 지원)이 결론을 좌우하면 사용자에게 온라인 위키 확인을 부탁합니다.
-- 사람에게 보여 줄 때는 `wiki-search-html <낱말>` 로 엽니다. 이 기기는 GNOME 이라 `xdg-open`(웹 브라우저)으로,
+- 사람에게 보여 줄 때는 `wiki-search-html <낱말>` 로 엽니다. 이 기기는 화면이 있어 `xdg-open`(웹 브라우저)으로,
   노드는 화면이 없어 `w3m` 으로 열립니다.
 - 같은 절이 노드의 CLAUDE.md(`server-automation` 의 `roles/agentic_coding/templates/CLAUDE.md.j2`)에도 있습니다.
   고칠 때 둘을 맞춥니다.

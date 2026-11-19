@@ -70,6 +70,17 @@ elif doing; then
 else
   todo "설치할 것: $missing"
 fi
+# 다른 패키지의 의존성으로만 깔린 것은 직접 설치로 표시합니다. 데스크톱 프로필을 바꿔 지울 때 같이 빠지지 않게(2026-11-19).
+asdeps=$({ pacman -Qdq "${PACMAN_PKGS[@]}" 2>/dev/null || true; } | tr '\n' ' ')
+if [ -z "${asdeps// }" ]; then
+  ok "모두 직접 설치로 표시됨"
+elif doing; then
+  # shellcheck disable=SC2086
+  sudo pacman -D --asexplicit $asdeps >/dev/null
+  did "직접 설치로 표시: $asdeps"
+else
+  todo "의존성으로만 깔림(직접 설치로 표시 필요): $asdeps"
+fi
 
 # --- 2. AUR (claude-code) -------------------------------------------------------
 # 노드는 role 이 pnpm 판과 자동 업데이트 판을 맞추지만, 이 기기는 다른 앱처럼 AUR 판 하나만 둡니다.
@@ -465,7 +476,7 @@ fi
 
 # --- 11. herdr --------------------------------------------------------------------
 # 노드의 herdr 를 이 기기에서 원격으로 엽니다(herdr --remote <ssh 대상>, 저장해 두려면 herdr machine add). 그러면
-# 화면이 이 기기에서 돌아 복사가 로컬 클립보드(wl-copy, gnome 프로필의 wl-clipboard)로 갑니다. ssh 안에서 띄운
+# 화면이 이 기기에서 돌아 복사가 로컬 클립보드(wl-copy, desktop 프로필의 wl-clipboard)로 갑니다. ssh 안에서 띄운
 # herdr 는 OSC 52 로 복사하는데 GNOME Terminal 은 그것을 받지 않습니다(2026-11-13, Ghostty 는 받음). 노드처럼
 # 공식 설치 스크립트로 ~/.local/bin/herdr 에 깔고(server-automation roles/agentic_coding/tasks/herdr.yml), 공개
 # 최신판보다 낮으면 올립니다. 스크립트는 latest.json 의 SHA-256 으로 바이너리를 대조합니다.

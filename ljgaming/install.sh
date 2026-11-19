@@ -4,6 +4,7 @@
 #   - ~/.claude/CLAUDE.md 를 ljgaming/CLAUDE.md 에서 복사합니다.
 #   - Claude Code mod(usage-meter, session-board)는 claude-mods/(server-automation 원본의 사본)를 로컬 폴더
 #     마켓플레이스로 등록해 user scope 로 깝니다. 폴더에서 바로 읽으므로 git pull 하면 새 세션부터 새 판입니다.
+#   - 이 clone 의 git pull 이 커밋 서명(토큰 A, B)을 확인하게 합니다(2026-11-19).
 #
 #   ljgaming/install.sh          설치와 갱신(이미 된 것은 건너뜀)
 #   ljgaming/install.sh --check  아무것도 바꾸지 않고 상태만 봄
@@ -16,7 +17,7 @@ CHECK=0
 case "${1:-}" in
   --check) CHECK=1 ;;
   "") ;;
-  *) sed -n 2,11p "$0"; exit 64 ;;
+  *) sed -n 2,12p "$0"; exit 64 ;;
 esac
 [ "$(id -u)" -ne 0 ] || { echo "root 가 아니라 평소 사용자로 돌리세요" >&2; exit 1; }
 
@@ -68,4 +69,45 @@ else
       todo "$mod 설치 안 됨"
     fi
   done
+fi
+
+# --- 3. settingfiles 커밋 서명 확인 -------------------------------------------------------
+# 저장소의 git-allowed-signers(토큰 A, B 의 공개 키)를 ~/.config/git/allowed_signers 로 처음 한 번만 복사하고, 이 clone 의
+# git pull 이 서명을 확인하게 합니다(merge.verifySignatures). 서명이 없거나 모르는 키로 서명한 커밋이면 pull 이 멈춥니다.
+# 이미 있는 파일은 덮어쓰지 않습니다. 저장소가 바뀌어도 저절로 믿지 않게 하려는 것이라, 키가 다르면 알리기만 합니다.
+step "settingfiles 커밋 서명 확인"
+signers="$HOME/.config/git/allowed_signers"
+keys_of() { grep -v -E '^\s*(#|$)' "$1" 2>/dev/null | awk '{print $(NF-1), $NF}' | sort; }
+if [ -f "$signers" ]; then
+  if [ "$(keys_of "$signers")" = "$(keys_of "$HERE/git-allowed-signers")" ]; then
+    ok "$signers"
+  else
+    todo "$signers 의 키가 git-allowed-signers 와 다름(확인한 뒤 손으로 맞추세요)"
+  fi
+elif doing; then
+  install -D -m 644 "$HERE/git-allowed-signers" "$signers"
+  did "$signers"
+else
+  todo "$signers 없음"
+fi
+repo_set() {  # key value
+  local cur
+  cur=$(git -C "$HERE" config --local --get "$1" || true)
+  if [ "$cur" = "$2" ]; then
+    ok "settingfiles $1 = $2"
+  elif doing; then
+    git -C "$HERE" config --local "$1" "$2"
+    did "settingfiles $1 = $2${cur:+ (전: $cur)}"
+  else
+    todo "settingfiles $1 = $2${cur:+ (지금: $cur)}"
+  fi
+}
+repo_set gpg.ssh.allowedSignersFile "$signers"
+repo_set merge.verifySignatures true
+if [ -f "$signers" ]; then
+  sig=$(git -C "$HERE" -c gpg.ssh.allowedSignersFile="$signers" log -1 --format='%G? %h' 2>/dev/null || true)
+  case $sig in
+    G\ *) ok "지금 커밋 ${sig#G } 의 서명 확인됨" ;;
+    *) todo "지금 커밋의 서명이 확인되지 않음(${sig:-알 수 없음})" ;;
+  esac
 fi

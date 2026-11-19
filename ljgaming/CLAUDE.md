@@ -142,6 +142,9 @@
 - `set.sh` 는 패키지를 깔지 않습니다. 필요한 명령(git, curl, nvim, tmux, pnpm, fastfetch)이 base 프로필에 있습니다.
 - 이 파일과 Claude Code mod 는 `ljgaming/install.sh` 가 깝니다. `git pull` 뒤에 다시 돌리면 이 파일이 새 판이 됩니다.
   mod 는 저장소의 `claude-mods/` 폴더에서 바로 읽으므로 pull 만으로 새 세션부터 새 판입니다.
+- `git pull` 은 커밋 서명을 확인합니다(2026-11-19, `ljgaming/install.sh` 가 `~/.config/git/allowed_signers` 와
+  `merge.verifySignatures` 를 둠, 토큰 A, B 의 공개 키는 저장소의 `git-allowed-signers`). 서명이 없거나 모르는 키라서 pull 이
+  멈추면 우회하지 말고 사용자에게 알립니다. `allowed_signers` 는 저장소 파일이 바뀌어도 저절로 바꾸지 않습니다.
 - GitHub 는 로그인 없이 받을 수 있는 공개 저장소만 클론합니다. 비공개 저장소의 내용이 필요해 보이면 멈추고 사용자에게
   말씀드립니다.
 

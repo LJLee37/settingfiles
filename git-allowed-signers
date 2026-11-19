@@ -1,0 +1,11 @@
+# 이 저장소(settingfiles)의 커밋에 서명하는 FIDO2 토큰 A, B 의 공개 키입니다(2026-11-19).
+# ljgaming/install.sh 가 ~/.config/git/allowed_signers 가 없을 때 한 번만 복사하고, git pull 이 서명을 확인하게 합니다
+# (gpg.ssh.allowedSignersFile, merge.verifySignatures). 이미 있는 파일은 덮어쓰지 않습니다. 저장소의 이 파일이 바뀌어도
+# 저절로 믿지 않게 하려는 것이라, 토큰을 바꿀 때는 사용자가 확인한 뒤 손으로 복사합니다.
+# 정본은 server-automation 의 git_allowed_signers 이고, 이름표만 이메일 대신 계정 이름입니다.
+
+# FIDO2 A (SHA256:R3OETX+am9lpgrUDdVBFMiff2wxMOLeNShcv0dbKK5M)
+LJLee37 namespaces="git" sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBBp7J+RKHTPCsudyIphNtCn0j6uOfS8z+++G+p1kcjihtcE+pU3jDZWhtCiizTdq0RvhB2ArF0S6MMQCJsB7tOwAAAAOc3NoOmxqbGVlX3NrX2E=
+
+# FIDO2 B, 백업 (SHA256:6qWTMYgC23aETkUREEcNFoGUj5DsSJkcLYw8uzCpsfk)
+LJLee37 namespaces="git" sk-ecdsa-sha2-nistp256@openssh.com AAAAInNrLWVjZHNhLXNoYTItbmlzdHAyNTZAb3BlbnNzaC5jb20AAAAIbmlzdHAyNTYAAABBBL+ZI+MhJt2U4EwZaFnpIhTMnKzGrcZ1Dp0hqsqvoN0IheBry3Tt/Xf/GKnmB4c0LTIwu+aBDiQ4T5Ss1uCBeswAAAAOc3NoOmxqbGVlX3NrX2I=

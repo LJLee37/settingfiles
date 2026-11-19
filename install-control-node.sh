@@ -216,6 +216,8 @@ repo_config server-automation gpg.format ssh
 repo_config server-automation user.signingkey "$HOME/.ssh/$FIDO_KEY"
 repo_config server-automation gpg.ssh.allowedSignersFile "$signers"
 repo_config server-automation gpg.ssh.program "$sign_wrapper"
+# settingfiles 도 같은 목록으로 서명을 확인합니다(git log %G?). LJGaming 은 ljgaming/install.sh 가 git-allowed-signers 로 합니다.
+repo_config settingfiles gpg.ssh.allowedSignersFile "$signers"
 repo_config worklog core.hooksPath githooks
 # llm-wiki 는 서명하지 않습니다(main-server 의 clone 과 헤르메스의 커밋도 서명하지 않음).
 repo_config llm-wiki commit.gpgsign false

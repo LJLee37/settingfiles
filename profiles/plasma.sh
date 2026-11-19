@@ -16,7 +16,10 @@ im_ok() { [ "$(kv kwinrc Wayland InputMethod)" = "$IBUS_IM" ]; }
 engines_ok() { gsettings get org.freedesktop.ibus.general preload-engines 2>/dev/null | grep -q hangul; }
 hangul_key_ok() { [ "$(kv kxkbrc Layout Options)" = korean:ralt_hangul ] && [ "$(kv kxkbrc Layout ResetOldOptions)" = true ]; }
 xim_ok() { grep -qx 'XMODIFIERS=@im=ibus' "$XIM_CONF" 2>/dev/null; }
-kwallet_pam_ok() { grep -qs pam_kwallet5 /etc/pam.d/gdm-password /etc/pam.d/plasmalogin; }
+# 로그인 화면의 PAM 파일은 /etc/pam.d 에 덮어쓴 것이 있으면 그것, 없으면 패키지 기본값(/usr/lib/pam.d)을 봅니다. plasmalogin 의
+# 기본값에는 pam_kwallet5 가 이미 있습니다(plasma-login-manager 6.8.3, 2026-11-19 LJGaming 확인).
+pam_file() { local f; for f in "/etc/pam.d/$1" "/usr/lib/pam.d/$1"; do [ -f "$f" ] && { echo "$f"; return 0; }; done; return 1; }
+kwallet_pam_ok() { local s f; for s in plasmalogin gdm-password; do f=$(pam_file "$s") && grep -qs pam_kwallet5 "$f" && return 0; done; return 1; }
 # --- 모양과 동작(2026-11-18 LJGaming 의 Plasma 를 옮김. 배경과 잠금 화면 이미지, 모니터별 화면 설정은 뺌) ---
 # - 테마: Breeze 어두운 테마(룩앤필) 위에 색 구성표 "하늘보라 다크"(profiles/plasma/SkyVioletDark.colors)와 아이콘
 #   Tela-circle-purple-dark. 룩앤필을 적용하면 색과 아이콘이 Breeze Dark 것으로 돌아가므로 룩앤필, 색, 아이콘 순서로 씁니다.
@@ -138,6 +141,6 @@ check() {
   if engines_ok; then ok "IBus 엔진 hangul"; else todo "IBus preload-engines 에 hangul 없음"; fi
   if hangul_key_ok; then ok "오른쪽 Alt = 한/영"; else todo "kxkbrc Options 가 korean:ralt_hangul 이 아님"; fi
   if xim_ok; then ok "XMODIFIERS=@im=ibus"; else todo "$XIM_CONF 없음"; fi
-  if kwallet_pam_ok; then ok "로그인 때 KWallet 열기(pam_kwallet5)"; else todo "로그인 화면 PAM 에 pam_kwallet5 없음(손으로, ljgaming/CLAUDE.md 참고)"; fi
+  if kwallet_pam_ok; then ok "로그인 때 KWallet 열기(pam_kwallet5)"; else todo "로그인 화면 PAM(plasmalogin, gdm-password)에 pam_kwallet5 없음(손으로, ljgaming/CLAUDE.md 참고)"; fi
   appearance_check
 }

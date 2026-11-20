@@ -27,6 +27,7 @@ kwallet_pam_ok() { local s f; for s in plasmalogin gdm-password; do f=$(pam_file
 # - 테마: Breeze 어두운 테마(룩앤필) 위에 색 구성표 "하늘보라 다크"(profiles/plasma/SkyVioletDark.colors)와 아이콘
 #   Tela-circle-purple-dark. 룩앤필을 적용하면 색과 아이콘이 Breeze Dark 것으로 돌아가므로 룩앤필, 색, 아이콘 순서로 씁니다.
 # - 패널: 화면마다 하단 패널(profiles/plasma/panels.js). plasmashell 이 떠 있을 때만(Plasma 세션에서 돌릴 때) 합니다.
+#   작업 표시줄은 작업 관리자(아이콘과 창 제목)입니다. 옛 아이콘 전용(icontasks)이 있으면 taskbar_swap 이 한 번 바꿔 끼웁니다.
 # - 설정값(PLASMA_SETTINGS): Dolphin 이 원격(NAS) 파일도 50 MiB 까지 미리보기, 전원(AC) 15분 뒤 화면 어둡게 30분 뒤 끄기와
 #   자동 절전 안 함, 30분 뒤 화면 잠금(잠근 즉시 비밀번호), 모든 마우스 자연 스크롤. 마우스는 KWin 이 장치를 붙일 때 읽는
 #   kcminputrc [Libinput][Defaults][Pointer] 라 새 마우스에도 들어가고, 장치별 값([Libinput][제조사][제품][이름])이 있으면 그것이
@@ -55,6 +56,34 @@ setting_set() { local a; mapfile -t a < <(setting_args "$2"); kwriteconfig6 --no
 plasma_running() { qdbus6 org.kde.plasmashell /PlasmaShell >/dev/null 2>&1; }
 panels_eval() { qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript "$(printf 'var MODE = "%s";\n' "$1"; cat "$PLASMA_DIR/panels.js")"; }
 panels_report() { while IFS= read -r l; do case $l in "ok: "*) ok "${l#ok: }" ;; "did: "*) did "${l#did: }" ;; "todo: "*) todo "${l#todo: }" ;; esac; done; }
+# 아이콘 전용 작업 표시줄(icontasks)을 작업 관리자(taskmanager)로(2026-11-20, LJGaming 사용자 요청). 아이콘 전용인지는 위젯
+# 플러그인 이름으로 정해져 설정으로 못 바꾸고, 새 위젯을 넣고 옛 것을 지우면 고정 앱(launchers) 같은 설정을 옮겨야 합니다.
+# 그래서 plasmashell 을 멈추고 appletsrc 의 plugin 키만 바꿉니다(LJGaming 에서 시험한 방법). 위젯 번호, 고정 앱, 순서가
+# 그대로 남고, 패널과 바탕화면이 몇 초 사라집니다. 바꾸기 전 appletsrc 는 같은 폴더에 .bak-taskmanager-<시각> 으로 둡니다.
+APPLETSRC="${XDG_CONFIG_HOME:-$HOME/.config}/plasma-org.kde.plasma.desktop-appletsrc"
+taskbar_swap() {
+  local old c a i
+  old=$(panels_eval old)
+  [ -n "${old// }" ] || return 0
+  cp -p "$APPLETSRC" "$APPLETSRC.bak-taskmanager-$(date +%Y%m%d-%H%M%S)"
+  systemctl --user stop plasma-plasmashell.service
+  while read -r c a; do
+    [ -n "$a" ] || continue
+    kwriteconfig6 --file "$APPLETSRC" --group Containments --group "$c" --group Applets --group "$a" \
+      --key plugin org.kde.plasma.taskmanager
+    did "패널 $c 의 작업 표시줄(위젯 $a)을 아이콘 전용에서 작업 관리자로"
+  done <<< "$old"
+  systemctl --user start plasma-plasmashell.service
+  # D-Bus 이름이 생긴 직후에는 패널을 아직 읽지 않았을 수 있습니다. 그때 panels.js 를 돌리면 "하단 패널 없음"으로 보고
+  # 새 패널을 만드므로, 패널이 다시 보일 때까지 기다립니다.
+  for i in $(seq 30); do
+    [ "$(qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'print(panels().length)' 2>/dev/null)" \
+      -gt 0 ] 2>/dev/null && { sleep 2; return 0; }
+    sleep 1
+  done
+  todo "plasmashell 이 30초 안에 패널을 다시 띄우지 않음(systemctl --user status plasma-plasmashell)"
+  return 1
+}
 lnf_ok() { [ "$(kv kdeglobals KDE LookAndFeelPackage)" = "$LNF" ]; }
 scheme_file_ok() { cmp -s "$PLASMA_DIR/$SCHEME.colors" "$SCHEME_FILE"; }
 scheme_ok() { scheme_file_ok && [ "$(kv kdeglobals General ColorScheme)" = "$SCHEME" ]; }
@@ -84,9 +113,11 @@ appearance_post() {
     # 새로 넣은 위젯은 plasmashell 이 스크립트가 끝난 뒤 순서 목록(AppletOrder) 맨 뒤에 덧붙여, 같은 실행에서 쓴 순서를
     # 덮어씁니다(2026-11-19 LJTF). 그래서 무엇을 바꿨으면 한 번 더 돌려 순서를 맞춥니다.
     local r
-    r=$(panels_eval apply)
-    printf '%s\n' "$r" | panels_report
-    case $r in *"did: "*) sleep 1; panels_eval apply | panels_report ;; esac
+    if taskbar_swap; then
+      r=$(panels_eval apply)
+      printf '%s\n' "$r" | panels_report
+      case $r in *"did: "*) sleep 1; panels_eval apply | panels_report ;; esac
+    else todo "패널은 plasmashell 이 돌아온 뒤 다시 돌려 맞춤"; fi
   else todo "패널은 Plasma 세션에서 다시 돌릴 때 맞춤"; fi
   local f g k v power=0
   while IFS='|' read -r f g k v; do

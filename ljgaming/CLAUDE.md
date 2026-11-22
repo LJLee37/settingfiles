@@ -1,8 +1,8 @@
 # CLAUDE.md - LJGaming (게이밍 데스크탑)
 
 > 이 파일(`~/.claude/CLAUDE.md`)은 settingfiles 의 `ljgaming/install.sh` 가 `ljgaming/CLAUDE.md` 에서 깝니다(2026-11-17).
-> 직접 고치면 다음 실행 때 "다름"으로 나오니, 고칠 것이 있으면 사용자에게 말씀드리고 컨트롤 노드에서 settingfiles 를
-> 고칩니다.
+> 직접 고치면 다음 실행 때 "다름"으로 나오니, 고칠 것이 있으면 사용자에게 말씀드리고 저장소의 `ljgaming/CLAUDE.md` 를
+> 고칩니다(이 기기에서 해도 됩니다. 아래 "settingfiles" 절).
 
 ## 이 기기
 
@@ -32,7 +32,7 @@
 사용자에게는 한국어 존댓말로 답합니다. 문서와 실제가 다르면 추측하지 말고 묻습니다.
 
 다시 깔 때의 절차는 settingfiles 의 문서 셋에 있습니다(2026-11-18). 이 기기의 `~/docs/ljgaming-waydroid.md`,
-`~/docs/ljgaming-airplay.md`, `~/docs/pam-u2f-setup.md` 와 같은 내용이고, 바꿀 것은 컨트롤 노드에서 저장소 쪽을 고칩니다.
+`~/docs/ljgaming-airplay.md`, `~/docs/pam-u2f-setup.md` 와 같은 내용이고, 바꿀 것은 저장소 쪽을 고칩니다(아래 "settingfiles" 절).
 
 - `ljgaming/docs/waydroid.md`: WayDroid(원스토어용). waydroid-nvidia-bin 0.2.0 `--mode venus`, GAPPS(LineageOS 20,
   Android 13), libhoudini, 창 1280x720 고정이고 Plasma 에서만 씁니다(GNOME 에서는 hwcomposer 가 죽음, #21). 소리는 안
@@ -158,9 +158,21 @@
 
 ## settingfiles(닷파일)
 
-- `~/gitRepos/settingfiles` 는 공개 저장소의 `arch` 브랜치 사본입니다. 이 기기에는 GitHub 로그인이 없어 push 하지 않습니다.
-- 닷파일(`.zshrc`, `init.vim`, Ghostty, herdr, tmux)은 이 저장소를 가리키는 링크입니다. 여기서 고치지 않습니다. 바꿀 것은
-  사용자에게 말씀드리고, 컨트롤 노드에서 고친 뒤 이 기기는 `git pull` 하고 필요하면 `zsh set.sh` 를 다시 돌립니다.
+- `~/gitRepos/settingfiles` 는 공개 저장소의 `arch` 브랜치 사본입니다. 공개 저장소라 비밀값이 없으므로 이 기기에서도
+  고치고 커밋, push 합니다(사용자 결정 2026-11-20). 비밀값이 있는 server-automation 은 이 기기에서 다루지 않습니다.
+- **고치기 전에 먼저 `git pull` 합니다.** 어느 노드(이 기기, 컨트롤 노드)에서 작업할지 정해져 있지 않기 때문입니다. 노드
+  사이의 작업 분담은 지금은 사용자가 정합니다(나중에는 설계 중인 저장소에서 나눌 예정).
+- 공개 저장소이므로 커밋 전에 바뀐 내용(diff)을 사용자에게 보여 드리고 확인받습니다. 개인 정보(NAS 주소, 도메인, 기기 ID,
+  이메일)는 넣지 않습니다.
+- 커밋은 토큰으로 서명하고 push 는 SSH 로 합니다. 이 사본의 `.git/config` 에 `gpg.format=ssh`,
+  `user.signingKey=~/.ssh/ljlee_sk_a`, `commit.gpgSign=true`, push 주소 `git@github.com:LJLee37/settingfiles.git`,
+  `core.sshCommand`(토큰 A, B 키만 씀)가 있습니다. 서명과 push 모두 토큰 PIN(ksshaskpass 창)과 터치를 묻고, 받기(fetch)는
+  https 라 토큰이 필요 없습니다. 토큰 B 만 꽂혀 있으면 `git -c user.signingKey=~/.ssh/ljlee_sk_b commit` 으로 서명합니다.
+  이 설정은 저장소 파일이 아니라 다시 클론하면 다시 둡니다. github.com 호스트 키는 `https://api.github.com/meta` 의 값을
+  `~/.ssh/known_hosts` 에 넣었습니다(2026-11-20).
+- 닷파일(`.zshrc`, `init.vim`, Ghostty, herdr, tmux)은 이 저장소를 가리키는 링크입니다. 링크된 파일을 고치는 것은 저장소를
+  고치는 것이므로 위 절차(pull, diff 확인, 서명 커밋, push)로 합니다. 다른 노드는 pull 하고 필요하면 `zsh set.sh` 를 다시
+  돌립니다.
 - `set.sh` 는 패키지를 깔지 않습니다. 필요한 명령(git, curl, nvim, tmux, pnpm, fastfetch)이 base 프로필에 있습니다.
 - 이 파일과 Claude Code mod 는 `ljgaming/install.sh` 가 깝니다. `git pull` 뒤에 다시 돌리면 이 파일이 새 판이 됩니다.
   mod 는 저장소의 `claude-mods/` 폴더에서 바로 읽으므로 pull 만으로 새 세션부터 새 판입니다.

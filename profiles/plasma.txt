@@ -16,6 +16,7 @@ plasma-browser-integration
 drkonqi                 # 충돌 보고
 plasma-login-manager    # 깔기만 함(켜지 않음)
 kwallet-pam             # 로그인 때 KWallet 을 엶. PAM 설정은 따로 해야 합니다
+plasma-keyboard         # 화상 키보드(사용자 2026-11-22). KWin 입력기 자리는 하나라, 고르면 IBus(한글 입력) 대신 뜸
 # 앱
 dolphin                 # 파일
 ark                     # 압축

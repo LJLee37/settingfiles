@@ -1,0 +1,25 @@
+#!/bin/bash
+# 화상 키보드(Plasma Keyboard)와 한글 입력기(IBus)를 바꿉니다(LJGaming, 2026-11-22).
+# 설명과 설치(링크)는 settingfiles 의 ljgaming/docs/osk.md 입니다. 이 파일은 ~/.local/bin/osk-toggle 로 링크합니다.
+# KWin 의 입력기 자리(kwinrc [Wayland] InputMethod)는 하나라 둘 중 하나만 씁니다.
+# - 화상 키보드: 입력 칸을 마우스로 누르면 뜸(kwinrc VirtualKeyboardMode=2). 그동안 실제 키보드의 한글 입력은 안 됨.
+#   Steam 처럼 X11(XWayland) 앱에는 안 뜨고, 터미널에서는 한글 자소가 조합되지 않음.
+# - IBus: 평소 상태(plasma 프로필이 맞추는 값).
+osk=/usr/share/applications/org.kde.plasma.keyboard.desktop
+ibus=/usr/share/applications/org.freedesktop.IBus.Panel.Wayland.Gtk3.desktop
+cur=$(kreadconfig6 --file kwinrc --group Wayland --key InputMethod)
+case ${1:-toggle} in
+  on) new=$osk ;;
+  off) new=$ibus ;;
+  *) if [[ $cur == "$osk" ]]; then new=$ibus; else new=$osk; fi ;;
+esac
+[[ $new == "$cur" ]] || kwriteconfig6 --file kwinrc --group Wayland --key InputMethod --notify "$new"
+if [[ $new == "$osk" ]]; then
+  # 마우스로 눌러도 뜨게(2 = 터치, 태블릿, 마우스 사용 시). 2026-11-22 에 2 로 둔 값이 어느새 1(터치 전용)로 돌아가 있었음
+  # (원인 못 찾음, 시스템 설정의 가상 키보드 페이지에서 적용한 것으로 짐작). 그래서 켤 때마다 맞춥니다. KWin 이 kwinrc 에도 씁니다.
+  vkb=(org.kde.KWin /VirtualKeyboard org.kde.kwin.VirtualKeyboard mode)
+  [[ $(busctl --user get-property "${vkb[@]}") == "i 2" ]] || busctl --user set-property "${vkb[@]}" i 2
+  notify-send -a "화상 키보드" -i input-keyboard-virtual "화상 키보드 켬" "입력 칸을 누르면 뜹니다. 실제 키보드 한글은 꺼집니다. 다시 누르면 한글 입력기로 돌아갑니다."
+else
+  notify-send -a "화상 키보드" -i input-keyboard "한글 입력기(IBus)로 돌아옴" "실제 키보드로 한글을 칠 수 있습니다."
+fi

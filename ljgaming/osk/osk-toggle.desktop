@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=화상 키보드 켜기/끄기
+Comment=화상 키보드(Plasma Keyboard)와 한글 입력기(IBus)를 바꿉니다
+Exec=/home/ljlee/.local/bin/osk-toggle
+Icon=input-keyboard-virtual
+Categories=Utility;Accessibility;
+Terminal=false

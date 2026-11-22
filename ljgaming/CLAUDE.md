@@ -42,6 +42,9 @@
   복귀 뒤 D802C 잡음이 없어지는지입니다. AirPlay 2 에서도 수신기가 원격 제어(다음 곡 등)를 보냅니다(shairport-sync
   5.6.3 의 MPRIS `Next` 등. 설명서 D-Bus.md 의 "Classic AirPlay 에서만" 은 옛 문장, 2026-11-20 정정). 곡이 저절로
   넘어가면 보내는 기기와 함께 이 PC 에서 MPRIS 호출(Plasma 미디어 위젯, 미디어 키, 다른 앱)이 있었는지 봅니다.
+- `ljgaming/docs/osk.md`: 화상 키보드(plasma-keyboard, 2026-11-22). KWin 입력기 자리가 하나라 IBus 와 번갈아 쓰고, 작업
+  표시줄의 "화상 키보드 켜기/끄기"(`ljgaming/osk/osk-toggle` 링크)로 바꿉니다. Ghostty(GTK 의 ibus 입력 모듈), 터미널의
+  한글 조합, XWayland 앱(Steam, X11 로 뜨는 게임)에서는 안 됩니다.
 - `docs/pam-u2f.md`: sudo 와 polkit 의 토큰 터치(아래 "root 권한"). 토큰을 바꾸거나 되돌리는 법도 있습니다.
 
 이 기기의 `~/docs` 에 있는 것:
@@ -117,7 +120,8 @@
     사용자 서비스가 지워진 실행 파일로 남아 돌므로 재부팅합니다.
 - **한글 입력**: `~/.config/environment.d/60-ibus-xim.conf` 의 `XMODIFIERS=@im=ibus`(plasma 프로필의 `plasma.sh` 가
   만듦)와, Steam 에만 둔 `GTK_IM_MODULE=ibus`(데스크톱 파일 사본, 이것도 `plasma.sh` 가 만듦)입니다. Plasma Wayland 에서 XWayland 앱(Steam)의
-  한글 입력 때문입니다.
+  한글 입력 때문입니다. 사용자가 화상 키보드를 켜 둔 동안에는 KWin 입력기가 Plasma Keyboard 라 실제 키보드로 한글이 안 되고
+  `--check plasma` 가 InputMethod 를 "필요"로 냅니다(`ljgaming/docs/osk.md`, `osk-toggle off` 로 돌아감).
 - **Discord** 는 기본값(네이티브 Wayland)으로 씁니다. 한글 조합 중 Shift+Enter 가 줄바꿈이 아니라 전송이 되는 문제는
   감수합니다(사용자 결정 2026-11-18). XWayland 로 고정하는 우회(`--ozone-platform=x11` 과 `GTK_IM_MODULE=ibus`)는
   시험해 보고 되돌렸고, 그 파일은 `~/install-logs/discord-x11-20261118/` 에 있습니다.

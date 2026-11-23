@@ -19,9 +19,19 @@
 - **설치 방법**: LJINST 임시 USB 에서 `~/docs` 의 문서대로 깔았습니다(2026-11-17). settingfiles 의 설치 스크립트
   (install0~2)는 쓰지 않았고 `set.sh` 만 돌렸습니다. 기록은 `~/waydroid-setup-log.md` 와 `~/install-logs/` 에 있습니다.
 - **server-automation 이 관리하지 않습니다**(사용자 결정 2026-11-17).
-  - sshd 는 꺼 두고, nftables 가 들어오는 연결을 막습니다.
-  - 포트를 열거나 sshd 를 켜는 것은 사용자 승인을 받은 뒤에만 합니다. 지금 여는 것은 모두 LAN(사설, 링크 로컬)
+  - nftables 가 들어오는 연결을 막습니다.
+  - **sshd 는 켜 두고 공개 키로만 들어옵니다**(사용자 결정 2026-11-23, 컨트롤 노드에서 herdr 로 이 기기를 쓰려고).
+    - 받는 것: 토큰 A, B 키(`~/.ssh/authorized_keys`)와, 그 토큰 키가 CA 로 서명한 인증서(`/etc/ssh/trusted_user_ca.pub`,
+      principal 은 `/etc/ssh/auth_principals/ljlee` 의 ljlee 하나라 root 용 인증서는 거부). 서버들과 같은 모양입니다.
+    - 막는 것: 비밀번호, 키보드 대화식, root 로그인(`/etc/ssh/sshd_config.d/10-ljgaming.conf`, `AllowUsers ljlee`).
+      Arch 기본 설정은 PasswordAuthentication 이 기본값(yes)이고 sshd 의 PAM 에는 토큰(pam_u2f)이 없어서, 이 파일이
+      없으면 로그인 비밀번호만으로 들어옵니다.
+    - openssh 를 올리거나 sshd 설정을 바꾼 뒤에는 root 로 `sshd -T` 를 보고(10.6 은 키워드를 `PasswordAuthentication`
+      처럼 대소문자 섞어 냄), 비밀번호만으로 접속해 "Permission denied (publickey)" 가 나오는지 봅니다.
+  - 포트를 열거나 sshd 설정을 바꾸는 것은 사용자 승인을 받은 뒤에만 합니다. 지금 여는 것은 모두 LAN(사설, 링크 로컬)
     출발지에만 엽니다.
+    - SSH(TCP 22): 그중에서도 Wi-Fi(`wlp3s0`)와 유선(`enp4s0`)으로 들어오는 것만. `waydroid0` 도 사설 주소라
+      인터페이스로 뺐습니다(2026-11-23).
     - mDNS(UDP 5353)와 Steam 포트
     - AirPlay 2: TCP 7000, UDP 319 와 320, TCP 와 UDP 32768-60999. shairport-sync 가 AirPlay 2 소켓을 임의
       포트에 열기 때문입니다(2026-11-18).

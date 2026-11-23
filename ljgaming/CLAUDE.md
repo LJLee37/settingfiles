@@ -35,8 +35,9 @@
 `~/docs/ljgaming-airplay.md`, `~/docs/pam-u2f-setup.md` 와 같은 내용이고, 바꿀 것은 저장소 쪽을 고칩니다(아래 "settingfiles" 절).
 
 - `ljgaming/docs/waydroid.md`: WayDroid(원스토어용). waydroid-nvidia-bin 0.2.0 `--mode venus`, GAPPS(LineageOS 20,
-  Android 13), libhoudini, 창 1280x720 고정이고 Plasma 에서만 씁니다(GNOME 에서는 hwcomposer 가 죽음, #21). 소리는 안
-  나고(사용자가 미룸), 재부팅 뒤 컨테이너는 저절로 뜨고, binder 는 세션을 시작할 때 생깁니다(2026-11-19 확인).
+  Android 13), libhoudini, 창 1280x720 고정이고 Plasma 에서만 씁니다(GNOME 에서는 hwcomposer 가 죽음, #21). 소리는
+  안드로이드 미디어 음량을 끝까지 올려 두고 Plasma 에서 맞춥니다(기본값 5/15 면 거의 안 들림, 2026-11-23). 재부팅 뒤
+  컨테이너는 저절로 뜨고, binder 는 세션을 시작할 때 생깁니다(2026-11-19 확인).
 - `ljgaming/docs/airplay.md`: AirPlay 2 수신기 "LJGaming" 하나(직접 빌드한 shairport-sync 5.6.3 과 nqptp 1.2.9, 보안
   갱신은 직접 챙김). 1시간 시험 통과(2026-11-18). 남은 확인은 로그아웃 뒤 다시 로그인했을 때 저절로 돌아오는지, 절전
   복귀 뒤 D802C 잡음이 없어지는지입니다. AirPlay 2 에서도 수신기가 원격 제어(다음 곡 등)를 보냅니다(shairport-sync

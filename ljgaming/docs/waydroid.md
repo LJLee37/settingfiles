@@ -9,7 +9,9 @@
 - **동작:** 원스토어 설치와 로그인, 게임 실행, ONE pay 결제와 혜택(페이백) 표시까지 정상(사용자). 계획의 목표를 달성했습니다.
 - **구성:** waydroid-nvidia-bin 0.2.0(AUR) `--mode venus`, Plasma 6 Wayland 세션, LineageOS 20 **GAPPS**(안드로이드 13), ARM 번역 libhoudini,
   창 1280x720 고정.
-- **안 되는 것:** 소리(사용자가 미룸, 원인 미조사). 창을 끌어서 크기 바꾸기(venus 모드의 한계).
+- **소리(2026-11-23):** 납니다. 처음에 아주 작게 났던 것은 안드로이드 미디어 음량이 기본값(15칸 중 5칸, 약 -32 dB)이라서였습니다.
+  PipeWire 의 "Waydroid" 스트림은 100% 였고, 그 스트림을 녹음하면 최고 -42 dBFS 였습니다. 미디어 음량을 끝까지 올린 뒤 정상(사용자).
+- **안 되는 것:** 창을 끌어서 크기 바꾸기(venus 모드의 한계).
 - **재부팅 뒤(2026-11-19 확인):** 컨테이너가 부팅 때 저절로 뜨고 wd-venus 도 active. 부팅 직후에는 binder 가 없고
   `waydroid session start` 때 binderfs 를 올리고 링크를 만들어 안드로이드가 부팅함(#45 는 이 기기에 해당 없음). 창 속성도 그대로.
 - **확인 안 한 것:** GLES 렌더러 문자열(`nvidia-smi` 로 GPU 사용만 확인).
@@ -58,6 +60,9 @@ PKGBUILD 를 사용자에게 보여 승인받습니다. 2026-11-18 의 스크립
    waydroid prop set persist.waydroid.window_decorations true   # 제목 표시줄(창을 끌어 옮김)
    ```
    바꾼 뒤에는 `waydroid session stop` 하고 다시 엽니다.
+   안드로이드의 **설정 > 소리 > 미디어 음량** 을 끝까지 올려 두고, 크기는 Plasma 에서 맞춥니다(기본값 5/15 면 거의 안 들림).
+   지금 값은 root 없이 `~/.local/share/waydroid/data/system/users/0/settings_system.xml` 의 `volume_music_speaker` 에 있습니다
+   (안드로이드 이진 XML(ABX) 이라 그냥 읽히지 않음).
 7. **Google 기기 등록:** GApps 로그인 뒤 "Play Protect 인증 안 됨"이면, GSF 의 android_id 를 https://www.google.com/android/uncertified 에
    등록합니다(Google 이 커스텀 ROM 용으로 둔 공식 절차, 사용자가 함). 값은 `~/.local/share/waydroid/data/data/com.google.android.gsf/databases/gservices.db`
    의 `main` 표 `android_id`(root 로 읽고, -wal, -shm 과 같이 사본을 떠서 읽음). 등록 뒤 반영까지 시간이 걸릴 수 있습니다.

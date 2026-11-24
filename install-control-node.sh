@@ -550,6 +550,159 @@ if [ -x "$herdr_bin" ]; then
 fi
 manual+=("herdr 원격: herdr machine add <노드의 ssh 주소> 로 저장하거나 herdr --remote <노드의 ssh 주소>(주소는 server-automation 의 host_vars). 백그라운드 재접속은 인증서 키가 ssh-agent 에 있을 때만 조용히 됩니다(5절의 자동 시작이 로그인 때 올림).")
 
+# --- 12. SSH 로 들어오기 ----------------------------------------------------------------
+# 다른 기기(주로 데스크탑)에서 이 컨트롤 노드로 SSH 로 들어와 herdr 로 Claude 를 쓰게 합니다(2026-11-24 사용자 결정).
+# 컨트롤 노드는 플레이북과 서명 키를 쥐고 있어 노드보다 강하게 둡니다(사용자: "인증서 사용하지 않고 토큰만").
+#  - 받는 키는 토큰(FIDO2) A, B 뿐이고 접속마다 터치합니다. 사용자 인증서(CA)는 믿지 않고, sshd 가 sk 알고리즘만
+#    받으므로 authorized_keys 에 다른 키가 잘못 들어가도 쓰이지 않습니다. 공개키는 server-automation 의 파일에서
+#    가져옵니다(이 공개 저장소에 키를 두지 않음).
+#  - sshd 는 늘 켜 두지 않습니다. outside 프로필처럼 밖(카페 등)에서는 꺼 두고, 아래 목록의 집 연결(NetworkManager
+#    연결 UUID)에 붙어 있을 때만 NetworkManager 디스패처가 켭니다. 목록은 이 기기에만 둡니다(저장소에 넣지 않음).
+#  - 방화벽은 ssh 를 사설(IPv4), 링크 로컬과 ULA(IPv6) 출발지에서만 받습니다. IPv6 는 공인 주소라 공유기 밖에서
+#    닿을 수 있습니다.
+step "SSH 로 들어오기(토큰 키만, 집 네트워크에서만)"
+ak="$HOME/.ssh/authorized_keys"
+ak_begin='# >>> settingfiles install-control-node.sh: token keys (managed) >>>'
+ak_end='# <<< settingfiles install-control-node.sh: token keys (managed) <<<'
+lan_from='10.0.0.0/8,172.16.0.0/12,192.168.0.0/16,fe80::/10,fc00::/7'
+want_ak=""
+for k in ljlee_sk_a ljlee_sk_b; do
+  pub="$SA/roles/common/files/keys/$k.pub"
+  [ -f "$pub" ] || continue
+  want_ak+="from=\"$lan_from\" $(awk '{print $1, $2}' "$pub") $k"$'\n'
+done
+want_ak="${want_ak%$'\n'}"
+ak_block() { awk -v b="$ak_begin" -v e="$ak_end" '$0==e{f=0} f{print} $0==b{f=1}' "$ak" 2>/dev/null || true; }
+if [ -z "$want_ak" ]; then
+  todo "토큰 공개키가 없음($SA/roles/common/files/keys/ljlee_sk_a.pub, ljlee_sk_b.pub)"
+elif [ "$(ak_block)" = "$want_ak" ]; then
+  ok "$ak 의 토큰 키 A, B"
+elif doing; then
+  mkdir -p -m 700 "$HOME/.ssh"
+  ak_tmp=$(mktemp)
+  if [ -f "$ak" ]; then awk -v b="$ak_begin" -v e="$ak_end" '$0==b{s=1} !s{print} $0==e{s=0}' "$ak" > "$ak_tmp"; fi
+  printf '%s\n%s\n%s\n' "$ak_begin" "$want_ak" "$ak_end" >> "$ak_tmp"
+  install -m 600 "$ak_tmp" "$ak"
+  rm -f "$ak_tmp"
+  did "$ak 의 토큰 키 A, B(LAN 출발지만)"
+else
+  todo "$ak 에 토큰 키 블록이 없거나 다름"
+fi
+
+sshd_conf=/etc/ssh/sshd_config.d/20-control-node.conf
+want_sshd="# settingfiles install-control-node.sh 12절: 컨트롤 노드로 들어오는 SSH 는 토큰(FIDO2) 키만, 접속마다 터치.
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitEmptyPasswords no
+PermitRootLogin no
+AuthenticationMethods publickey
+PubkeyAcceptedAlgorithms sk-ecdsa-sha2-nistp256@openssh.com,sk-ssh-ed25519@openssh.com
+PubkeyAuthOptions touch-required
+AllowUsers $USER"
+if [ "$(cat "$sshd_conf" 2>/dev/null)" = "$want_sshd" ]; then
+  ok "$sshd_conf"
+elif doing; then
+  printf '%s\n' "$want_sshd" | sudo install -D -m 644 /dev/stdin "$sshd_conf"
+  if sudo sshd -t; then
+    if systemctl is-active -q sshd.service; then sudo systemctl reload sshd.service; fi
+    did "$sshd_conf"
+  else
+    sudo rm -f "$sshd_conf"
+    todo "$sshd_conf 가 sshd -t 를 통과하지 못해 지움"
+  fi
+else
+  todo "$sshd_conf 없음 또는 다름"
+fi
+
+# 디스패처가 켜고 끄므로 부팅 때 저절로 켜지지 않게 합니다.
+if ! systemctl is-enabled -q sshd.service 2>/dev/null; then
+  ok "sshd.service 는 부팅 때 켜지지 않음(디스패처가 켬)"
+elif doing; then
+  sudo systemctl disable -q sshd.service
+  did "sshd.service 부팅 때 켜기를 끔(디스패처가 켬)"
+else
+  todo "sshd.service 가 부팅 때 켜짐(밖에서도 켜짐)"
+fi
+if systemctl is-enabled -q NetworkManager-dispatcher.service 2>/dev/null; then
+  ok "NetworkManager-dispatcher.service"
+elif doing; then
+  sudo systemctl enable -q --now NetworkManager-dispatcher.service
+  did "NetworkManager-dispatcher.service 켬"
+else
+  todo "NetworkManager-dispatcher.service 꺼져 있음"
+fi
+disp=/etc/NetworkManager/dispatcher.d/50-control-node-sshd
+nets=/etc/control-node-sshd-networks
+want_disp='#!/bin/sh
+# settingfiles install-control-node.sh 12절: 이 기기가 /etc/control-node-sshd-networks 에 적힌 연결(NetworkManager
+# 연결 UUID, 한 줄에 하나)에 붙어 있을 때만 sshd 를 켜고, 아니면 끕니다. 목록이 없거나 비면 늘 끕니다.
+case "$2" in up|down|vpn-up|vpn-down) ;; *) exit 0 ;; esac
+nets=/etc/control-node-sshd-networks
+for uuid in $(nmcli -t -f UUID connection show --active 2>/dev/null); do
+  if [ -r "$nets" ] && grep -qxF "$uuid" "$nets"; then exec systemctl start sshd.service; fi
+done
+exec systemctl stop sshd.service'
+if [ "$(cat "$disp" 2>/dev/null)" = "$want_disp" ] && [ -x "$disp" ]; then
+  ok "$disp"
+elif doing; then
+  printf '%s\n' "$want_disp" | sudo install -D -m 755 /dev/stdin "$disp"
+  did "$disp"
+else
+  todo "$disp 없음 또는 다름"
+fi
+# 집 연결 목록. 사람이 있는 터미널에서 돌릴 때 지금 붙은 연결을 집으로 넣을지 묻습니다.
+if [ -s "$nets" ]; then
+  ok "$nets(집 연결 $(grep -c . "$nets")개)"
+elif doing && [ -t 0 ]; then
+  # UUID 를 앞에 둡니다(이름에 : 가 있으면 nmcli -t 가 \: 로 바꿔 뒤 칸이 밀림).
+  net_now=$(nmcli -t -f UUID,TYPE,NAME connection show --active 2>/dev/null | awk -F: '$2!="loopback"{print; exit}')
+  if [ -n "$net_now" ]; then
+    net_uuid=${net_now%%:*}
+    net_name=${net_now#*:*:}
+    yn=""
+    read -r -p "   지금 붙은 연결 '$net_name' 을 집 네트워크로 넣을까요(그 연결에서만 sshd 를 켬)? [y/N] " yn || true
+    if [ "$yn" = y ]; then
+      printf '%s\n' "$net_uuid" | sudo install -m 644 /dev/stdin "$nets"
+      sudo "$disp" none up   # 디스패처를 한 번 돌려 지금 상태에 맞춤
+      did "$nets($net_name)"
+    else
+      todo "$nets 없음(sshd 는 늘 꺼짐)"
+    fi
+  else
+    todo "$nets 없음, 지금 붙은 연결도 없음"
+  fi
+else
+  todo "$nets 없음(sshd 는 늘 꺼짐)"
+fi
+
+nft_conf=/etc/nftables.conf
+nft_old='tcp dport ssh accept comment "allow sshd"'
+nft_new4='ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 } tcp dport ssh accept comment "allow sshd from private LAN (settingfiles control node)"'
+nft_new6='ip6 saddr { fe80::/10, fc00::/7 } tcp dport ssh accept comment "allow sshd from link-local and ULA (settingfiles control node)"'
+if grep -qF "$nft_new4" "$nft_conf" 2>/dev/null && grep -qF "$nft_new6" "$nft_conf" && ! grep -qF "$nft_old" "$nft_conf"; then
+  ok "$nft_conf ssh 는 LAN 출발지만"
+elif grep -qF "$nft_old" "$nft_conf" 2>/dev/null && ! doing; then
+  todo "$nft_conf 가 ssh 를 어느 출발지에서나 받음(LAN 출발지로 좁힐 것)"
+elif grep -qF "$nft_old" "$nft_conf" 2>/dev/null; then
+  nft_tmp=$(mktemp)
+  awk -v old="$nft_old" -v n4="$nft_new4" -v n6="$nft_new6" '{
+    s = $0; sub(/^[ \t]+/, "", s)
+    if (s == old) { ind = substr($0, 1, length($0) - length(s)); print ind n4; print ind n6 } else print
+  }' "$nft_conf" > "$nft_tmp"
+  if sudo nft -c -f "$nft_tmp"; then
+    sudo install -m 644 "$nft_tmp" "$nft_conf"
+    # print.sh 와 같은 까닭으로 파일을 직접 다시 읽음(Arch nftables.service 는 reload 가 없음)
+    if systemctl is-enabled -q nftables 2>/dev/null; then sudo nft -f "$nft_conf"; fi
+    did "$nft_conf ssh 를 LAN 출발지로 좁힘"
+  else
+    todo "$nft_conf 바꾼 규칙이 nft -c 를 통과하지 못해 그대로 둠"
+  fi
+  rm -f "$nft_tmp"
+else
+  todo "$nft_conf 에서 ssh 규칙('$nft_old')을 찾지 못함, 손으로 LAN 출발지만 받게 고치세요"
+fi
+manual+=("다른 기기에서 이 컨트롤 노드로 들어올 때는 토큰 A 나 B 를 그 기기에 꽂고 핸들 파일로 접속합니다(접속마다 터치). 그 기기의 ~/.ssh/config 에는 AddressFamily inet 을 둡니다(mDNS 가 IPv6 공인 주소를 먼저 주면 방화벽에 막힘). 집 연결을 더하거나 빼려면 /etc/control-node-sshd-networks(연결 UUID 한 줄에 하나, nmcli -t -f NAME,UUID connection show)를 고친 뒤 그 연결에 다시 붙습니다.")
+
 # --- 손으로 할 것 -----------------------------------------------------------------
 manual+=("Claude Code 로그인(claude 를 한 번 실행)과, 다른 세션과 대화할 때 /remote-control.")
 manual+=("vault 비밀번호는 어디에도 저장하지 않습니다. check, apply 때 --ask-vault-pass 로 칩니다.")

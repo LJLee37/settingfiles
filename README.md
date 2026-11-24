@@ -128,6 +128,13 @@ Profiles are `profiles/<name>.txt` (one package per line, `aur:<name>` for AUR)
 plus an optional `profiles/<name>.sh` with `pre`/`post`/`check` hooks:
 `./install-profile.sh --list` shows them, `--check` only reports.
 
+`maia-client.sh` points this machine's chess programs at the Maia-3 engine on
+main-server (`ssh main-server maia-human <model> <Elo>`): it adds an SSH
+connection-reuse block for the `main-server` alias, so a token touch is needed
+once per 4 hours instead of once per game, and one Knights engine per Elo.
+The server address is asked once and never stored here. See
+[docs/maia-client.md](docs/maia-client.md); `--check` only reports.
+
 `set-hibernate.sh` predates this layout (swap partition, udev-based initramfs)
 and is not for portable machines: resuming a card on a different computer than
 the one it hibernated on corrupts its filesystem.

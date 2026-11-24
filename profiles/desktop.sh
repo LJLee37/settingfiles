@@ -1,4 +1,4 @@
-# desktop 프로필 설정: 블루투스 서비스, 기본 편집기 nvim, 터미널 앱 Ghostty, SSH 에이전트(FIDO2).
+# desktop 프로필 설정: 블루투스 서비스, 기본 편집기 nvim, 터미널 앱 Ghostty, SSH 에이전트(FIDO2), DNS 고정.
 #
 # 기본 텍스트 편집기는 nvim 입니다(2026-11-13 사용자 결정). nvim.desktop 이 받는 MIME 형식마다 이 사용자의
 # ~/.config/mimeapps.list 에 기본으로 적습니다(GNOME, Plasma 둘 다 이 파일을 봄). 셸의 $EDITOR 는 .zshrc 가 이미 nvim 입니다.
@@ -21,6 +21,12 @@
 # SUDO_ASKPASS 도 같은 창으로 둡니다. 터미널이 없는 곳(Claude Code 의 Bash)에서 sudo -A <명령> 을 부르면 비밀번호를 창으로
 # 묻습니다(2026-11-19 사용자 결정, LJTF 에서 시험). sudo 비밀번호는 Remember password 를 켜지 않습니다(켜면 묻지 않고 root 가 됨).
 # environment.d 는 사용자 관리자가 다시 뜰 때 읽으므로(linger 면 재부팅) 지금 관리자에는 set-environment 로도 넣습니다.
+#
+# DNS 고정: NetworkManager 전역 DNS 로 모든 연결(VPN 포함)의 DNS 를 1.1.1.1, 1.0.0.1, 8.8.8.8 로 덮습니다(2026-11-24 사용자
+# 결정). 집 통신사의 기본 DNS 가 "local" 의 SOA 질의에 답을 주어(NXDOMAIN 이 아님) nss-mdns 가 스스로 물러났고, 그래서
+# LJTF.local, LJGaming.local 이 엉뚱한 공인 주소로 풀렸습니다(2026-11-23, ArchWiki 「Avahi」 의 nss-mdns 절). 세 DNS 는 NXDOMAIN 을
+# 줍니다. 서버들의 VPN 이 주는 DNS 도 1.1.1.1, 1.0.0.1 입니다. 카페 등에서 로그인 화면(캡티브 포털)이 뜨지 않으면 이 파일을
+# 잠시 치우고 `sudo systemctl reload NetworkManager` 합니다.
 EDITOR_DESKTOP=nvim.desktop
 TERMINAL_DESKTOP=com.mitchellh.ghostty.desktop
 TERMINAL_LIST="${XDG_CONFIG_HOME:-$HOME/.config}/xdg-terminals.list"
@@ -35,9 +41,19 @@ SSH_ASKPASS_REQUIRE=prefer
 SUDO_ASKPASS=/usr/bin/ksshaskpass'
 agent_conf_ok() { [ "$(grep -v -E '^\s*(#|$)' "$AGENT_CONF" 2>/dev/null)" = "$AGENT_WANT" ]; }
 agent_on() { systemctl --user is-enabled -q ssh-agent.socket 2>/dev/null; }
+DNS_CONF=/etc/NetworkManager/conf.d/50-settingfiles-dns.conf
+DNS_WANT='[global-dns-domain-*]
+servers=1.1.1.1,1.0.0.1,8.8.8.8'
+dns_conf_ok() { [ "$(grep -v -E '^\s*(#|$)' "$DNS_CONF" 2>/dev/null)" = "$DNS_WANT" ]; }
 gcr_off() { [ "$(systemctl --user is-enabled gcr-ssh-agent.socket 2>/dev/null)" = masked ] && ! systemctl --user is-active -q gcr-ssh-agent.socket 2>/dev/null; }
 post() {
   enable_unit bluetooth.service
+  if dns_conf_ok; then ok "DNS 고정(1.1.1.1, 1.0.0.1, 8.8.8.8)"; else
+    printf '# settingfiles desktop.sh: DNS 고정(이 파일 머리의 DNS 절)\n%s\n' "$DNS_WANT" | as_root install -Dm644 /dev/stdin "$DNS_CONF"
+    # 전역 DNS 는 설정을 다시 읽을 때 반영됩니다(SIGHUP). chroot 안에서는 다음 부팅부터.
+    if ! in_chroot && systemctl is-active -q NetworkManager; then as_root systemctl reload NetworkManager; fi
+    did "DNS 고정($DNS_CONF)"
+  fi
   if [ "$(id -u)" -eq 0 ]; then todo "기본 편집기와 터미널은 첫 부팅 뒤 사용자로 다시 돌릴 때 정함"; return 0; fi
   if editor_ok; then ok "기본 편집기 nvim"; else
     # shellcheck disable=SC2046  # MIME 형식을 낱개 인자로
@@ -72,6 +88,7 @@ post() {
 }
 check() {
   if systemctl is-enabled -q bluetooth.service 2>/dev/null; then ok bluetooth.service; else todo "bluetooth.service 꺼져 있음"; fi
+  if dns_conf_ok; then ok "DNS 고정(1.1.1.1, 1.0.0.1, 8.8.8.8)"; else todo "$DNS_CONF 가 없거나 다름(DNS 고정)"; fi
   if editor_ok; then ok "기본 편집기 nvim"; else todo "기본 편집기가 nvim 이 아님"; fi
   if terminal_ok; then ok "터미널 앱은 Ghostty(GTK)"; else todo "터미널 앱 목록($TERMINAL_LIST)이 Ghostty 가 아님"; fi
   if agent_on; then ok "ssh-agent.socket(OpenSSH 에이전트)"; else todo "ssh-agent.socket 꺼져 있음"; fi

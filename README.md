@@ -98,7 +98,8 @@ fallback image, GRUB menu delay, zram instead of swap), `LUKS` (LUKS2 root),
    `server-automation` control node and keeps it current on re-runs (pacman
    tools, AUR `claude-code`, `server-automation`, `worklog` and `llm-wiki`
    clones, commit signing, SSH certificate setup, the `github.com` SSH block,
-   Ansible collections, lid-on-AC, the Claude Code mods, the `cc-timelog-push`
+   Ansible collections, lid-on-AC (logind, and Plasma's PowerDevil, which takes
+   the lid over from logind while you are logged in), the Claude Code mods, the `cc-timelog-push`
    user timer, and the global `~/.claude/CLAUDE.md` from
    `control-node/CLAUDE.md`). `--check` only reports.
    It needs a terminal for sudo and the FIDO2 PIN and touch, and prints what

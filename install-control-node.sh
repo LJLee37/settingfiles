@@ -368,6 +368,25 @@ elif doing; then
 else
   todo "$lid_conf 없음"
 fi
+# Plasma 에서는 PowerDevil 이 덮개 처리를 logind 에서 넘겨받으므로(handle-lid-switch 억제) 위 설정은 로그인 화면에서만
+# 듣습니다. 2026-11-24 전원 연결 중에 덮개를 닫자 절전했습니다. 그래서 PowerDevil 의 전원 연결(AC) 프로필에서도
+# 덮개를 닫으면 화면만 잠급니다. 값은 PowerDevil 의 동작 번호로 0 아무것도 안 함, 1 절전, 32 화면 잠금입니다.
+if command -v kwriteconfig6 >/dev/null; then
+  if [ "$(kreadconfig6 --file powerdevilrc --group AC --group SuspendAndShutdown --key LidAction)" = 32 ]; then
+    ok "PowerDevil: 전원 연결 중 덮개를 닫으면 화면 잠금"
+  elif doing; then
+    kwriteconfig6 --file powerdevilrc --group AC --group SuspendAndShutdown --key LidAction 32
+    # reparseConfiguration 만으로는 덮개 동작이 바뀌지 않고 refreshStatus 까지 불러야 새 값을 씁니다(2026-11-24 LJTF,
+    # HandleButtonEvents.lidAction 이 1 에서 32 로 바뀌는 것을 확인).
+    for m in reparseConfiguration refreshStatus; do
+      qdbus6 org.kde.Solid.PowerManagement /org/kde/Solid/PowerManagement \
+        "org.kde.Solid.PowerManagement.$m" >/dev/null 2>&1 || true
+    done
+    did "PowerDevil: 전원 연결 중 덮개를 닫으면 화면 잠금(절전하지 않음)"
+  else
+    todo "PowerDevil: 전원 연결 중 덮개를 닫으면 절전함"
+  fi
+fi
 
 # --- 8. Claude Code mod ------------------------------------------------------------
 # 노드와 같은 mod 를 씁니다. 노드는 role 이 폴더를 복사하지만, 여기서는 clone 의 폴더를 바로
